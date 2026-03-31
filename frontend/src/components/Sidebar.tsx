@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Package,
   ArrowDownToLine,
-  ArrowUpFromLine,
   Wrench,
   Truck,
   History,
@@ -25,9 +24,7 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Inventario', href: '/dashboard/inventario', icon: Package },
-  { name: 'Entradas', href: '/dashboard/entradas', icon: ArrowDownToLine },
-  { name: 'Salidas', href: '/dashboard/salidas', icon: ArrowUpFromLine },
+  { name: 'Recursos', href: '/dashboard/recursos', icon: Package },
   { name: 'Equipos', href: '/dashboard/equipos', icon: Wrench },
   { name: 'Salida Equipos', href: '/dashboard/salida-equipos', icon: Truck },
   { name: 'Entrada Equipos', href: '/dashboard/entrada-equipos', icon: ArrowDownToLine },
