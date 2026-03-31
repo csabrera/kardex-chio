@@ -30,9 +30,12 @@ export class SalidaEquiposService {
       .leftJoinAndSelect('se.quienRecibe', 'qr');
 
     if (query.search) {
-      qb.andWhere('(LOWER(eq.nombre) LIKE LOWER(:search) OR LOWER(ft.nombre) LIKE LOWER(:search))', {
-        search: `%${query.search}%`,
-      });
+      qb.andWhere(
+        '(LOWER(eq.nombre) LIKE LOWER(:search) OR LOWER(ft.nombre) LIKE LOWER(:search))',
+        {
+          search: `%${query.search}%`,
+        },
+      );
     }
 
     if (query.fecha_desde) {
@@ -46,7 +49,10 @@ export class SalidaEquiposService {
     qb.orderBy('se.fecha', 'DESC').addOrderBy('se.id', 'DESC');
 
     const total = await qb.getCount();
-    const data = await qb.skip((page - 1) * limit).take(limit).getMany();
+    const data = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
     return {
       data,
@@ -67,17 +73,29 @@ export class SalidaEquiposService {
   }
 
   async create(dto: CreateSalidaEquipoDto, userId: string) {
-    const se = this.salidaEquiposRepo.create({
-      ...dto,
-      created_by: userId,
-    });
-    const saved = await this.salidaEquiposRepo.save(se);
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const se = manager.create(SalidaEquipo, {
+        ...dto,
+        created_by: userId,
+      });
+      const savedSe = await manager.save(se);
 
-    await this.dataSource.query(
-      `INSERT INTO movimientos (tipo, referencia_id, equipo_id, cantidad, fecha, descripcion, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      ['SALIDA_EQUIPO', saved.id, dto.equipo_id, dto.cantidad, dto.fecha, `${dto.descripcion_trabajo || ''}`, userId],
-    );
+      await manager.query(
+        `INSERT INTO movimientos (tipo, referencia_id, equipo_id, cantidad, fecha, descripcion, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          'SALIDA_EQUIPO',
+          savedSe.id,
+          dto.equipo_id,
+          dto.cantidad,
+          dto.fecha,
+          `${dto.descripcion_trabajo || ''}`,
+          userId,
+        ],
+      );
+
+      return savedSe;
+    });
 
     return this.findOne(saved.id);
   }

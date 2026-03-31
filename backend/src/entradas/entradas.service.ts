@@ -33,9 +33,12 @@ export class EntradasService {
       .leftJoinAndSelect('e.medioTransporte', 'mt');
 
     if (query.search) {
-      qb.andWhere('(LOWER(r.nombre) LIKE LOWER(:search) OR LOWER(e.num_guia) LIKE LOWER(:search))', {
-        search: `%${query.search}%`,
-      });
+      qb.andWhere(
+        '(LOWER(r.nombre) LIKE LOWER(:search) OR LOWER(e.num_guia) LIKE LOWER(:search))',
+        {
+          search: `%${query.search}%`,
+        },
+      );
     }
 
     if (query.categoria_id) {
@@ -53,7 +56,10 @@ export class EntradasService {
     qb.orderBy('e.fecha', 'DESC').addOrderBy('e.id', 'DESC');
 
     const total = await qb.getCount();
-    const data = await qb.skip((page - 1) * limit).take(limit).getMany();
+    const data = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
     return {
       data,
@@ -67,25 +73,43 @@ export class EntradasService {
   async findOne(id: number) {
     const entrada = await this.entradasRepo.findOne({
       where: { id },
-      relations: ['recurso', 'recurso.categoria', 'quienEntrega', 'quienRecibe', 'medioTransporte'],
+      relations: [
+        'recurso',
+        'recurso.categoria',
+        'quienEntrega',
+        'quienRecibe',
+        'medioTransporte',
+      ],
     });
     if (!entrada) throw new NotFoundException('Entrada no encontrada');
     return entrada;
   }
 
   async create(dto: CreateEntradaDto, userId: string) {
-    const entrada = this.entradasRepo.create({
-      ...dto,
-      created_by: userId,
-    });
-    const saved = await this.entradasRepo.save(entrada);
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const entrada = manager.create(Entrada, {
+        ...dto,
+        created_by: userId,
+      });
+      const savedEntrada = await manager.save(entrada);
 
-    // Register movement for traceability
-    await this.dataSource.query(
-      `INSERT INTO movimientos (tipo, referencia_id, recurso_id, cantidad, fecha, descripcion, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      ['ENTRADA', saved.id, dto.recurso_id, dto.cantidad, dto.fecha, `Guía: ${dto.num_guia || 'S/N'}`, userId],
-    );
+      // Register movement for traceability (within transaction)
+      await manager.query(
+        `INSERT INTO movimientos (tipo, referencia_id, recurso_id, cantidad, fecha, descripcion, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          'ENTRADA',
+          savedEntrada.id,
+          dto.recurso_id,
+          dto.cantidad,
+          dto.fecha,
+          `Guía: ${dto.num_guia || 'S/N'}`,
+          userId,
+        ],
+      );
+
+      return savedEntrada;
+    });
 
     return this.findOne(saved.id);
   }
