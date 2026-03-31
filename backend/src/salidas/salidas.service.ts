@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Salida } from './salida.entity';
 import { CreateSalidaDto } from './dto/create-salida.dto';
+import { UpdateSalidaDto } from './dto/update-salida.dto';
 
 @Injectable()
 export class SalidasService {
@@ -131,6 +132,87 @@ export class SalidasService {
     });
 
     return this.findOne(saved.id);
+  }
+
+  async update(id: number, dto: UpdateSalidaDto, userId: string) {
+    const salida = await this.findOne(id);
+
+    await this.dataSource.transaction(async (manager) => {
+      const recursoId = dto.recurso_id ?? salida.recurso.id;
+      const cantidad = dto.cantidad ?? Number(salida.cantidad);
+
+      // Revalidar stock si cambia cantidad o recurso
+      if (dto.cantidad !== undefined || dto.recurso_id !== undefined) {
+        const stockResult = await manager.query(
+          'SELECT existencia_actual FROM vista_inventario WHERE id = $1',
+          [recursoId],
+        );
+
+        if (!stockResult.length) {
+          throw new NotFoundException(
+            `Recurso ${recursoId} no encontrado en inventario`,
+          );
+        }
+
+        let disponible = parseFloat(stockResult[0].existencia_actual);
+        // Si el recurso no cambió, la salida original ya está descontada del inventario
+        // Se debe "devolver" esa cantidad para calcular la disponibilidad real
+        if (recursoId === salida.recurso.id) {
+          disponible += Number(salida.cantidad);
+        }
+
+        if (cantidad > disponible) {
+          throw new BadRequestException(
+            `Stock insuficiente. Disponible: ${disponible}`,
+          );
+        }
+      }
+
+      const fecha = dto.fecha ?? salida.fecha.toISOString();
+      const numReg =
+        'num_registro' in dto ? (dto.num_registro ?? null) : salida.num_registro;
+      const frenteId =
+        'frente_trabajo_id' in dto
+          ? (dto.frente_trabajo_id ?? null)
+          : salida.frenteTrabajo?.id ?? null;
+      const descTrabajo =
+        'descripcion_trabajo' in dto
+          ? (dto.descripcion_trabajo ?? null)
+          : salida.descripcion_trabajo;
+      const entregaId =
+        'quien_entrega_id' in dto
+          ? (dto.quien_entrega_id ?? null)
+          : salida.quienEntrega?.id ?? null;
+      const recibeId =
+        'quien_recibe_id' in dto
+          ? (dto.quien_recibe_id ?? null)
+          : salida.quienRecibe?.id ?? null;
+
+      await manager.query(
+        `UPDATE salidas SET fecha=$1, num_registro=$2, recurso_id=$3, cantidad=$4,
+         frente_trabajo_id=$5, descripcion_trabajo=$6, quien_entrega_id=$7, quien_recibe_id=$8
+         WHERE id=$9`,
+        [
+          fecha,
+          numReg,
+          recursoId,
+          cantidad,
+          frenteId,
+          descTrabajo,
+          entregaId,
+          recibeId,
+          id,
+        ],
+      );
+
+      await manager.query(
+        `UPDATE movimientos SET cantidad=$1, recurso_id=$2, fecha=$3, descripcion=$4
+         WHERE tipo='SALIDA' AND referencia_id=$5`,
+        [cantidad, recursoId, fecha, descTrabajo || '', id],
+      );
+    });
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {

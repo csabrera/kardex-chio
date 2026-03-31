@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { EntradasService } from './entradas.service';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
+import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -51,6 +53,17 @@ export class EntradasController {
   @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
   create(@Body() dto: CreateEntradaDto, @Request() req: any) {
     return this.entradasService.create(dto, req.user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateEntradaDto,
+    @Request() req: any,
+  ) {
+    return this.entradasService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')

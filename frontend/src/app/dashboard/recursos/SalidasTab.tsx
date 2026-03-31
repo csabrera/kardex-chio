@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DataTable from '@/components/DataTable';
 import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
-import { Search, Plus, Trash2, ArrowUpFromLine } from 'lucide-react';
+import { Search, Plus, Trash2, Pencil, ArrowUpFromLine } from 'lucide-react';
 import { showSuccess, showError, confirmDelete } from '@/lib/swal';
 
 interface Recurso {
@@ -74,6 +74,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
 
   // Modal state
   const [nuevoModal, setNuevoModal] = useState(false);
+  const [editing, setEditing] = useState<Salida | null>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -96,7 +97,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
   const [selectedRecurso, setSelectedRecurso] = useState<Recurso | null>(null);
   const recursoRef = useRef<HTMLDivElement>(null);
 
-  const canCreate = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
+  const canEdit = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
   const canDelete = user?.rol === 'ADMIN';
 
   useEffect(() => {
@@ -157,7 +158,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
     return () => clearTimeout(timer);
   }, [fetchData]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.recurso_id) {
       setFormError('Debe seleccionar un recurso');
@@ -166,7 +167,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
     setFormError('');
     setFormLoading(true);
     try {
-      await api.post('/salidas', {
+      const payload = {
         fecha: form.fecha,
         num_registro: form.num_registro || undefined,
         recurso_id: parseInt(form.recurso_id),
@@ -175,17 +176,42 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
         descripcion_trabajo: form.descripcion_trabajo || undefined,
         quien_entrega_id: form.quien_entrega_id ? parseInt(form.quien_entrega_id) : undefined,
         quien_recibe_id: form.quien_recibe_id ? parseInt(form.quien_recibe_id) : undefined,
-      });
+      };
+      if (editing) {
+        await api.put(`/salidas/${editing.id}`, payload);
+        showSuccess('Salida actualizada exitosamente');
+      } else {
+        await api.post('/salidas', payload);
+        showSuccess('Salida registrada exitosamente');
+      }
       setNuevoModal(false);
       resetForm();
-      showSuccess('Salida registrada exitosamente');
+      setEditing(null);
       fetchData();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setFormError(error.response?.data?.message || 'Error al registrar salida');
+      setFormError(error.response?.data?.message || 'Error al guardar salida');
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const openEdit = (item: Salida) => {
+    setEditing(item);
+    setForm({
+      fecha: new Date(item.fecha).toISOString().slice(0, 16),
+      num_registro: item.num_registro || '',
+      recurso_id: String(item.recurso.id),
+      cantidad: String(item.cantidad),
+      frente_trabajo_id: String(item.frenteTrabajo?.id || ''),
+      descripcion_trabajo: item.descripcion_trabajo || '',
+      quien_entrega_id: String(item.quienEntrega?.id || ''),
+      quien_recibe_id: String(item.quienRecibe?.id || ''),
+    });
+    setRecursoSearch(`${item.recurso.codigo} - ${item.recurso.nombre}`);
+    setSelectedRecurso(item.recurso as Recurso);
+    setFormError('');
+    setNuevoModal(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -270,16 +296,29 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
       header: 'Recibe', key: 'quien_recibe', className: 'w-32',
       render: (item: Salida) => item.quienRecibe?.nombre || '-',
     },
-    ...(canDelete ? [{
+    ...((canEdit || canDelete) ? [{
       header: 'Acciones', key: 'actions', className: 'w-20',
       render: (item: Salida) => (
-        <button
-          onClick={() => handleDelete(item.id)}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          title="Eliminar"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {canEdit && (
+            <button
+              onClick={() => openEdit(item)}
+              className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              title="Editar"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Eliminar"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       ),
     }] : []),
   ];
@@ -333,8 +372,8 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
             placeholder="Hasta"
             title="Fecha hasta"
           />
-          {canCreate && (
-            <button onClick={() => { resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center gap-2">
+          {canEdit && (
+            <button onClick={() => { setEditing(null); resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Nueva Salida
             </button>
@@ -347,8 +386,8 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
       <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
 
       {/* Nueva Salida Modal */}
-      <Modal isOpen={nuevoModal} onClose={() => setNuevoModal(false)} title="Nueva Salida">
-        <form onSubmit={handleCreate} className="space-y-4">
+      <Modal isOpen={nuevoModal} onClose={() => { setNuevoModal(false); setEditing(null); }} title={editing ? 'Editar Salida' : 'Nueva Salida'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
@@ -488,9 +527,9 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setNuevoModal(false)} className="btn-secondary">Cancelar</button>
+            <button type="button" onClick={() => { setNuevoModal(false); setEditing(null); }} className="btn-secondary">Cancelar</button>
             <button type="submit" disabled={formLoading} className="btn-primary disabled:opacity-50">
-              {formLoading ? 'Guardando...' : 'Registrar Salida'}
+              {formLoading ? 'Guardando...' : editing ? 'Actualizar Salida' : 'Registrar Salida'}
             </button>
           </div>
         </form>

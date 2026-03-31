@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DataTable from '@/components/DataTable';
 import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
-import { Search, Plus, Trash2 } from 'lucide-react';
+import { Search, Plus, Trash2, Pencil } from 'lucide-react';
 import { showSuccess, showError, confirmDelete } from '@/lib/swal';
 
 interface Recurso {
@@ -75,6 +75,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
   const [mediosTransporte, setMediosTransporte] = useState<MedioTransporte[]>([]);
 
   const [nuevoModal, setNuevoModal] = useState(false);
+  const [editing, setEditing] = useState<Entrada | null>(null);
 
   const [form, setForm] = useState({
     fecha: new Date().toISOString().slice(0, 16),
@@ -94,7 +95,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
   const [selectedRecurso, setSelectedRecurso] = useState<Recurso | null>(null);
   const recursoRef = useRef<HTMLDivElement>(null);
 
-  const canCreate = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
+  const canEdit = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
   const canDelete = user?.rol === 'ADMIN';
 
   useEffect(() => {
@@ -153,7 +154,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
     return () => clearTimeout(timer);
   }, [fetchData]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.recurso_id) {
       setFormError('Debe seleccionar un recurso');
@@ -162,7 +163,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
     setFormError('');
     setFormLoading(true);
     try {
-      await api.post('/entradas', {
+      const payload = {
         fecha: form.fecha,
         num_guia: form.num_guia || undefined,
         recurso_id: parseInt(form.recurso_id),
@@ -170,17 +171,41 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
         quien_entrega_id: form.quien_entrega_id ? parseInt(form.quien_entrega_id) : undefined,
         quien_recibe_id: form.quien_recibe_id ? parseInt(form.quien_recibe_id) : undefined,
         medio_transporte_id: form.medio_transporte_id ? parseInt(form.medio_transporte_id) : undefined,
-      });
+      };
+      if (editing) {
+        await api.put(`/entradas/${editing.id}`, payload);
+        showSuccess('Entrada actualizada exitosamente');
+      } else {
+        await api.post('/entradas', payload);
+        showSuccess('Entrada registrada exitosamente');
+      }
       setNuevoModal(false);
       resetForm();
-      showSuccess('Entrada registrada exitosamente');
+      setEditing(null);
       fetchData();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setFormError(error.response?.data?.message || 'Error al registrar entrada');
+      setFormError(error.response?.data?.message || 'Error al guardar entrada');
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const openEdit = (item: Entrada) => {
+    setEditing(item);
+    setForm({
+      fecha: new Date(item.fecha).toISOString().slice(0, 16),
+      num_guia: item.num_guia || '',
+      recurso_id: String(item.recurso.id),
+      cantidad: String(item.cantidad),
+      quien_entrega_id: String(item.quienEntrega?.id || ''),
+      quien_recibe_id: String(item.quienRecibe?.id || ''),
+      medio_transporte_id: String(item.medioTransporte?.id || ''),
+    });
+    setRecursoSearch(`${item.recurso.codigo} - ${item.recurso.nombre}`);
+    setSelectedRecurso(item.recurso as Recurso);
+    setFormError('');
+    setNuevoModal(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -259,16 +284,29 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
       header: 'Transporte', key: 'medio_transporte', className: 'w-28',
       render: (item: Entrada) => item.medioTransporte?.nombre || '-',
     },
-    ...(canDelete ? [{
+    ...((canEdit || canDelete) ? [{
       header: 'Acciones', key: 'actions', className: 'w-20',
       render: (item: Entrada) => (
-        <button
-          onClick={() => handleDelete(item.id)}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          title="Eliminar"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {canEdit && (
+            <button
+              onClick={() => openEdit(item)}
+              className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              title="Editar"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Eliminar"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       ),
     }] : []),
   ];
@@ -313,8 +351,8 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
             placeholder="Hasta"
             title="Fecha hasta"
           />
-          {canCreate && (
-            <button onClick={() => { resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center gap-2">
+          {canEdit && (
+            <button onClick={() => { setEditing(null); resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Nueva Entrada
             </button>
@@ -325,8 +363,8 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
       <DataTable columns={columns} data={data} loading={loading} emptyMessage="No hay entradas registradas" rowNumberOffset={(page - 1) * 20} />
       <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
 
-      <Modal isOpen={nuevoModal} onClose={() => setNuevoModal(false)} title="Nueva Entrada">
-        <form onSubmit={handleCreate} className="space-y-4">
+      <Modal isOpen={nuevoModal} onClose={() => { setNuevoModal(false); setEditing(null); }} title={editing ? 'Editar Entrada' : 'Nueva Entrada'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
@@ -453,9 +491,9 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setNuevoModal(false)} className="btn-secondary">Cancelar</button>
+            <button type="button" onClick={() => { setNuevoModal(false); setEditing(null); }} className="btn-secondary">Cancelar</button>
             <button type="submit" disabled={formLoading} className="btn-primary disabled:opacity-50">
-              {formLoading ? 'Guardando...' : 'Registrar Entrada'}
+              {formLoading ? 'Guardando...' : editing ? 'Actualizar Entrada' : 'Registrar Entrada'}
             </button>
           </div>
         </form>

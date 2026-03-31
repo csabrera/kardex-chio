@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like } from 'typeorm';
 import { Entrada } from './entrada.entity';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
+import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -112,6 +113,44 @@ export class EntradasService {
     });
 
     return this.findOne(saved.id);
+  }
+
+  async update(id: number, dto: UpdateEntradaDto, userId: string) {
+    const entrada = await this.findOne(id);
+
+    await this.dataSource.transaction(async (manager) => {
+      const recursoId = dto.recurso_id ?? entrada.recurso.id;
+      const cantidad = dto.cantidad ?? Number(entrada.cantidad);
+      const fecha = dto.fecha ?? entrada.fecha.toISOString();
+      const numGuia =
+        'num_guia' in dto ? (dto.num_guia ?? null) : entrada.num_guia;
+      const entregaId =
+        'quien_entrega_id' in dto
+          ? (dto.quien_entrega_id ?? null)
+          : entrada.quienEntrega?.id ?? null;
+      const recibeId =
+        'quien_recibe_id' in dto
+          ? (dto.quien_recibe_id ?? null)
+          : entrada.quienRecibe?.id ?? null;
+      const transporteId =
+        'medio_transporte_id' in dto
+          ? (dto.medio_transporte_id ?? null)
+          : entrada.medioTransporte?.id ?? null;
+
+      await manager.query(
+        `UPDATE entradas SET fecha=$1, num_guia=$2, recurso_id=$3, cantidad=$4,
+         quien_entrega_id=$5, quien_recibe_id=$6, medio_transporte_id=$7 WHERE id=$8`,
+        [fecha, numGuia, recursoId, cantidad, entregaId, recibeId, transporteId, id],
+      );
+
+      await manager.query(
+        `UPDATE movimientos SET cantidad=$1, recurso_id=$2, fecha=$3, descripcion=$4
+         WHERE tipo='ENTRADA' AND referencia_id=$5`,
+        [cantidad, recursoId, fecha, `Guía: ${numGuia || 'S/N'}`, id],
+      );
+    });
+
+    return this.findOne(id);
   }
 
   async remove(id: number) {

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { SalidasService } from './salidas.service';
 import { CreateSalidaDto } from './dto/create-salida.dto';
+import { UpdateSalidaDto } from './dto/update-salida.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -51,6 +53,17 @@ export class SalidasController {
   @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
   create(@Body() dto: CreateSalidaDto, @Request() req: any) {
     return this.salidasService.create(dto, req.user.id);
+  }
+
+  @Put(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateSalidaDto,
+    @Request() req: any,
+  ) {
+    return this.salidasService.update(id, dto, req.user.id);
   }
 
   @Delete(':id')
