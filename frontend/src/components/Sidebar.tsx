@@ -6,9 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
   Package,
-  ArrowDownToLine,
   Wrench,
-  Truck,
   History,
   FileSpreadsheet,
   Users,
@@ -25,9 +23,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Recursos', href: '/dashboard/recursos', icon: Package },
-  { name: 'Equipos', href: '/dashboard/equipos', icon: Wrench },
-  { name: 'Salida Equipos', href: '/dashboard/salida-equipos', icon: Truck },
-  { name: 'Entrada Equipos', href: '/dashboard/entrada-equipos', icon: ArrowDownToLine },
+  { name: 'Gestión de Equipos', href: '/dashboard/gestion-equipos', icon: Wrench },
   { name: 'Movimientos', href: '/dashboard/movimientos', icon: History },
   { name: 'Reportes', href: '/dashboard/reportes', icon: FileSpreadsheet },
 ];
