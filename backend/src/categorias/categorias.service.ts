@@ -15,7 +15,10 @@ export class CategoriasService {
   }
 
   findActivos() {
-    return this.categoriasRepo.find({ where: { activo: true }, order: { nombre: 'ASC' } });
+    return this.categoriasRepo.find({
+      where: { activo: true },
+      order: { nombre: 'ASC' },
+    });
   }
 
   async findOne(id: number) {

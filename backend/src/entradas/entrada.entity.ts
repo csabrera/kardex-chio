@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Recurso } from '../recursos/recurso.entity.js';
 import { Usuario } from '../usuarios/usuario.entity.js';
 import { Persona } from '../personas/persona.entity.js';

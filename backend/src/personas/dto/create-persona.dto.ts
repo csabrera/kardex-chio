@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsEmail,
+} from 'class-validator';
 import { PersonaTipo } from '../persona.entity';
 
 export class CreatePersonaDto {

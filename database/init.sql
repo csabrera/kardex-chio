@@ -11,7 +11,7 @@ CREATE TYPE user_role AS ENUM ('ADMIN', 'ALMACENERO', 'SUPERVISOR');
 CREATE TYPE tipo_documento AS ENUM ('DNI', 'CE', 'PASAPORTE');
 CREATE TYPE equipo_estado AS ENUM ('EN_ALMACEN', 'SALIDA', 'INGRESO');
 CREATE TYPE persona_tipo AS ENUM ('PROVEEDOR', 'TRABAJADOR', 'TRANSPORTISTA');
-CREATE TYPE movimiento_tipo AS ENUM ('ENTRADA', 'SALIDA', 'SALIDA_EQUIPO');
+CREATE TYPE movimiento_tipo AS ENUM ('ENTRADA', 'SALIDA', 'SALIDA_EQUIPO', 'ENTRADA_EQUIPO');
 
 -- =============================================
 -- TABLA: usuarios
@@ -161,6 +161,23 @@ CREATE TABLE equipos (
 -- TABLA: salida_equipos
 -- =============================================
 CREATE TABLE salida_equipos (
+    id SERIAL PRIMARY KEY,
+    fecha TIMESTAMP NOT NULL,
+    num_registro VARCHAR(50),
+    equipo_id INTEGER NOT NULL REFERENCES equipos(id),
+    cantidad DECIMAL(12,2) NOT NULL,
+    frente_trabajo_id INTEGER REFERENCES frentes_trabajo(id),
+    descripcion_trabajo VARCHAR(300),
+    quien_entrega_id INTEGER REFERENCES personas(id),
+    quien_recibe_id INTEGER REFERENCES personas(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID REFERENCES usuarios(id)
+);
+
+-- =============================================
+-- TABLA: entrada_equipos (retorno de equipos)
+-- =============================================
+CREATE TABLE entrada_equipos (
     id SERIAL PRIMARY KEY,
     fecha TIMESTAMP NOT NULL,
     num_registro VARCHAR(50),

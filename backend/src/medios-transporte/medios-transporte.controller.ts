@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { MediosTransporteService } from './medios-transporte.service';
 import { CreateMedioTransporteDto } from './dto/create-medio-transporte.dto';
 import { UpdateMedioTransporteDto } from './dto/update-medio-transporte.dto';
@@ -41,7 +51,10 @@ export class MediosTransporteController {
   @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateMedioTransporteDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateMedioTransporteDto,
+  ) {
     return this.mediosTransporteService.update(id, dto);
   }
 

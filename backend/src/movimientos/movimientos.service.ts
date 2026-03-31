@@ -54,7 +54,10 @@ export class MovimientosService {
     qb.addSelect(['u.id', 'u.nombre', 'u.documento']);
 
     const total = await qb.getCount();
-    const data = await qb.skip((page - 1) * limit).take(limit).getMany();
+    const data = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
     return {
       data,

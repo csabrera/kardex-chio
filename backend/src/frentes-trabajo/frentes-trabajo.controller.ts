@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { FrentesTrabajoService } from './frentes-trabajo.service';
 import { CreateFrenteTrabajoDto } from './dto/create-frente-trabajo.dto';
 import { UpdateFrenteTrabajoDto } from './dto/update-frente-trabajo.dto';
@@ -41,7 +51,10 @@ export class FrentesTrabajoController {
   @Put(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFrenteTrabajoDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateFrenteTrabajoDto,
+  ) {
     return this.frentesTrabajoService.update(id, dto);
   }
 

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { SalidaEquiposService } from './salida-equipos.service';
 import { CreateSalidaEquipoDto } from './dto/create-salida-equipo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,7 +30,13 @@ export class SalidaEquiposController {
     @Query('fecha_desde') fecha_desde?: string,
     @Query('fecha_hasta') fecha_hasta?: string,
   ) {
-    return this.salidaEquiposService.findAll({ page, limit, search, fecha_desde, fecha_hasta });
+    return this.salidaEquiposService.findAll({
+      page,
+      limit,
+      search,
+      fecha_desde,
+      fecha_hasta,
+    });
   }
 
   @Get(':id')

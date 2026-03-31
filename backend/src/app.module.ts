@@ -13,6 +13,7 @@ import { EntradasModule } from './entradas/entradas.module';
 import { SalidasModule } from './salidas/salidas.module';
 import { EquiposModule } from './equipos/equipos.module';
 import { SalidaEquiposModule } from './salida-equipos/salida-equipos.module';
+import { EntradaEquiposModule } from './entrada-equipos/entrada-equipos.module';
 import { MovimientosModule } from './movimientos/movimientos.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportesModule } from './reportes/reportes.module';
@@ -45,7 +46,10 @@ import { ReportesModule } from './reportes/reportes.module';
           host: configService.get<string>('POSTGRES_HOST', 'localhost'),
           port: configService.get<number>('POSTGRES_PORT', 5432),
           username: configService.get<string>('POSTGRES_USER', 'kardexchio'),
-          password: configService.get<string>('POSTGRES_PASSWORD', 'kardexchio_2026'),
+          password: configService.get<string>(
+            'POSTGRES_PASSWORD',
+            'kardexchio_2026',
+          ),
           database: configService.get<string>('POSTGRES_DB', 'kardexchio'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: false,
@@ -64,6 +68,7 @@ import { ReportesModule } from './reportes/reportes.module';
     SalidasModule,
     EquiposModule,
     SalidaEquiposModule,
+    EntradaEquiposModule,
     MovimientosModule,
     DashboardModule,
     ReportesModule,

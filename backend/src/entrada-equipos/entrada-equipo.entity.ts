@@ -6,13 +6,13 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Recurso } from '../recursos/recurso.entity.js';
+import { Equipo } from '../equipos/equipo.entity.js';
 import { Usuario } from '../usuarios/usuario.entity.js';
 import { FrenteTrabajo } from '../frentes-trabajo/frente-trabajo.entity.js';
 import { Persona } from '../personas/persona.entity.js';
 
-@Entity('salidas')
-export class Salida {
+@Entity('entrada_equipos')
+export class EntradaEquipo {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,11 +23,11 @@ export class Salida {
   num_registro: string;
 
   @Column()
-  recurso_id: number;
+  equipo_id: number;
 
-  @ManyToOne(() => Recurso, (recurso) => recurso.salidas)
-  @JoinColumn({ name: 'recurso_id' })
-  recurso: Recurso;
+  @ManyToOne(() => Equipo)
+  @JoinColumn({ name: 'equipo_id' })
+  equipo: Equipo;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   cantidad: number;

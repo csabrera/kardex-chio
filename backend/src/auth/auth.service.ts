@@ -20,7 +20,9 @@ export class AuthService {
     const user = await this.usuariosRepo.findOne({
       where: {
         documento: loginDto.documento,
-        ...(loginDto.tipo_documento && { tipo_documento: loginDto.tipo_documento }),
+        ...(loginDto.tipo_documento && {
+          tipo_documento: loginDto.tipo_documento,
+        }),
       },
     });
 
@@ -28,7 +30,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
@@ -60,7 +65,10 @@ export class AuthService {
     const user = await this.usuariosRepo.findOne({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('Usuario no encontrado');
 
-    const isPasswordValid = await bcrypt.compare(dto.password_actual, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      dto.password_actual,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('La contraseña actual es incorrecta');
     }

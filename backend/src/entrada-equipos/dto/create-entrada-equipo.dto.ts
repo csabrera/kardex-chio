@@ -1,12 +1,6 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsDateString,
-} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
-export class CreateSalidaDto {
+export class CreateEntradaEquipoDto {
   @IsDateString()
   fecha: string;
 
@@ -15,7 +9,7 @@ export class CreateSalidaDto {
   num_registro?: string;
 
   @IsNumber()
-  recurso_id: number;
+  equipo_id: number;
 
   @IsNumber()
   cantidad: number;

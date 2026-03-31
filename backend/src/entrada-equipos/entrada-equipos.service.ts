@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { SalidaEquipo } from './salida-equipo.entity';
-import { CreateSalidaEquipoDto } from './dto/create-salida-equipo.dto';
+import { EntradaEquipo } from './entrada-equipo.entity';
+import { CreateEntradaEquipoDto } from './dto/create-entrada-equipo.dto';
 
 @Injectable()
-export class SalidaEquiposService {
+export class EntradaEquiposService {
   constructor(
-    @InjectRepository(SalidaEquipo)
-    private salidaEquiposRepo: Repository<SalidaEquipo>,
+    @InjectRepository(EntradaEquipo)
+    private entradaEquiposRepo: Repository<EntradaEquipo>,
     private dataSource: DataSource,
   ) {}
 
@@ -22,12 +22,12 @@ export class SalidaEquiposService {
     const page = query.page || 1;
     const limit = query.limit || 20;
 
-    const qb = this.salidaEquiposRepo
-      .createQueryBuilder('se')
-      .leftJoinAndSelect('se.equipo', 'eq')
-      .leftJoinAndSelect('se.frenteTrabajo', 'ft')
-      .leftJoinAndSelect('se.quienEntrega', 'qe')
-      .leftJoinAndSelect('se.quienRecibe', 'qr');
+    const qb = this.entradaEquiposRepo
+      .createQueryBuilder('ee')
+      .leftJoinAndSelect('ee.equipo', 'eq')
+      .leftJoinAndSelect('ee.frenteTrabajo', 'ft')
+      .leftJoinAndSelect('ee.quienEntrega', 'qe')
+      .leftJoinAndSelect('ee.quienRecibe', 'qr');
 
     if (query.search) {
       qb.andWhere(
@@ -39,14 +39,14 @@ export class SalidaEquiposService {
     }
 
     if (query.fecha_desde) {
-      qb.andWhere('se.fecha >= :desde', { desde: query.fecha_desde });
+      qb.andWhere('ee.fecha >= :desde', { desde: query.fecha_desde });
     }
 
     if (query.fecha_hasta) {
-      qb.andWhere('se.fecha <= :hasta', { hasta: query.fecha_hasta });
+      qb.andWhere('ee.fecha <= :hasta', { hasta: query.fecha_hasta });
     }
 
-    qb.orderBy('se.fecha', 'DESC').addOrderBy('se.id', 'DESC');
+    qb.orderBy('ee.fecha', 'DESC').addOrderBy('ee.id', 'DESC');
 
     const total = await qb.getCount();
     const data = await qb
@@ -64,25 +64,25 @@ export class SalidaEquiposService {
   }
 
   async findOne(id: number) {
-    const se = await this.salidaEquiposRepo.findOne({
+    const ee = await this.entradaEquiposRepo.findOne({
       where: { id },
       relations: ['equipo', 'frenteTrabajo', 'quienEntrega', 'quienRecibe'],
     });
-    if (!se) throw new NotFoundException('Salida de equipo no encontrada');
-    return se;
+    if (!ee) throw new NotFoundException('Entrada de equipo no encontrada');
+    return ee;
   }
 
-  async create(dto: CreateSalidaEquipoDto, userId: string) {
+  async create(dto: CreateEntradaEquipoDto, userId: string) {
     const saved = await this.dataSource.transaction(async (manager) => {
-      const se = manager.create(SalidaEquipo, {
+      const ee = manager.create(EntradaEquipo, {
         ...dto,
         created_by: userId,
       });
-      const savedSe = await manager.save(se);
+      const savedEe = await manager.save(ee);
 
-      // Actualizar estado del equipo a SALIDA
+      // Actualizar estado del equipo a EN_ALMACEN
       await manager.query(
-        `UPDATE equipos SET estado = 'SALIDA', updated_at = NOW() WHERE id = $1`,
+        `UPDATE equipos SET estado = 'EN_ALMACEN', updated_at = NOW() WHERE id = $1`,
         [dto.equipo_id],
       );
 
@@ -91,8 +91,8 @@ export class SalidaEquiposService {
         `INSERT INTO movimientos (tipo, referencia_id, equipo_id, cantidad, fecha, descripcion, created_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
-          'SALIDA_EQUIPO',
-          savedSe.id,
+          'ENTRADA_EQUIPO',
+          savedEe.id,
           dto.equipo_id,
           dto.cantidad,
           dto.fecha,
@@ -101,15 +101,15 @@ export class SalidaEquiposService {
         ],
       );
 
-      return savedSe;
+      return savedEe;
     });
 
     return this.findOne(saved.id);
   }
 
   async remove(id: number) {
-    const se = await this.findOne(id);
-    await this.salidaEquiposRepo.remove(se);
-    return { message: 'Salida de equipo eliminada' };
+    const ee = await this.findOne(id);
+    await this.entradaEquiposRepo.remove(ee);
+    return { message: 'Entrada de equipo eliminada' };
   }
 }

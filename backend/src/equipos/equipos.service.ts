@@ -19,7 +19,9 @@ export class EquiposService {
       .leftJoinAndSelect('e.unidadMedida', 'um');
 
     if (query.search) {
-      qb.andWhere('LOWER(e.nombre) LIKE LOWER(:search)', { search: `%${query.search}%` });
+      qb.andWhere('LOWER(e.nombre) LIKE LOWER(:search)', {
+        search: `%${query.search}%`,
+      });
     }
 
     if (query.estado) {

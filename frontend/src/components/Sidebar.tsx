@@ -30,6 +30,7 @@ const navigation = [
   { name: 'Salidas', href: '/dashboard/salidas', icon: ArrowUpFromLine },
   { name: 'Equipos', href: '/dashboard/equipos', icon: Wrench },
   { name: 'Salida Equipos', href: '/dashboard/salida-equipos', icon: Truck },
+  { name: 'Entrada Equipos', href: '/dashboard/entrada-equipos', icon: ArrowDownToLine },
   { name: 'Movimientos', href: '/dashboard/movimientos', icon: History },
   { name: 'Reportes', href: '/dashboard/reportes', icon: FileSpreadsheet },
 ];

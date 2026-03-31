@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -17,17 +22,23 @@ export class UsuariosService {
     switch (tipoDocumento) {
       case TipoDocumento.DNI:
         if (!/^\d{8}$/.test(documento)) {
-          throw new BadRequestException('El DNI debe tener exactamente 8 dígitos numéricos');
+          throw new BadRequestException(
+            'El DNI debe tener exactamente 8 dígitos numéricos',
+          );
         }
         break;
       case TipoDocumento.CE:
         if (!/^[A-Za-z0-9]{9}$/.test(documento)) {
-          throw new BadRequestException('El Carnet de Extranjería debe tener 9 caracteres alfanuméricos');
+          throw new BadRequestException(
+            'El Carnet de Extranjería debe tener 9 caracteres alfanuméricos',
+          );
         }
         break;
       case TipoDocumento.PASAPORTE:
         if (!/^[A-Za-z0-9]{1,12}$/.test(documento)) {
-          throw new BadRequestException('El Pasaporte debe tener hasta 12 caracteres alfanuméricos');
+          throw new BadRequestException(
+            'El Pasaporte debe tener hasta 12 caracteres alfanuméricos',
+          );
         }
         break;
     }
@@ -51,7 +62,9 @@ export class UsuariosService {
     const tipoDocumento = dto.tipo_documento || TipoDocumento.DNI;
     this.validateDocumento(tipoDocumento, dto.documento);
 
-    const exists = await this.usuariosRepo.findOne({ where: { documento: dto.documento } });
+    const exists = await this.usuariosRepo.findOne({
+      where: { documento: dto.documento },
+    });
     if (exists) throw new ConflictException('El documento ya está registrado');
 
     const hashedPassword = await bcrypt.hash(dto.documento, 10);

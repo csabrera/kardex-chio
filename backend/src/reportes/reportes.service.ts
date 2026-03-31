@@ -8,7 +8,9 @@ export class ReportesService {
   constructor(private dataSource: DataSource) {}
 
   async generarExcelInventario(): Promise<ExcelJS.Workbook> {
-    const data = await this.dataSource.query('SELECT * FROM vista_inventario ORDER BY nombre ASC');
+    const data = await this.dataSource.query(
+      'SELECT * FROM vista_inventario ORDER BY nombre ASC',
+    );
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Inventario');
@@ -45,7 +47,10 @@ export class ReportesService {
     return workbook;
   }
 
-  async generarExcelEntradas(fechaDesde?: string, fechaHasta?: string): Promise<ExcelJS.Workbook> {
+  async generarExcelEntradas(
+    fechaDesde?: string,
+    fechaHasta?: string,
+  ): Promise<ExcelJS.Workbook> {
     let sql = `
       SELECT e.id, e.fecha, e.num_guia, r.codigo, r.nombre as recurso, c.nombre as categoria,
              um.nombre as unidad, e.cantidad,
@@ -103,7 +108,10 @@ export class ReportesService {
     return workbook;
   }
 
-  async generarExcelSalidas(fechaDesde?: string, fechaHasta?: string): Promise<ExcelJS.Workbook> {
+  async generarExcelSalidas(
+    fechaDesde?: string,
+    fechaHasta?: string,
+  ): Promise<ExcelJS.Workbook> {
     let sql = `
       SELECT s.id, s.fecha, s.num_registro, r.codigo, r.nombre as recurso, c.nombre as categoria,
              um.nombre as unidad, s.cantidad, ft.nombre as frente_trabajo,
@@ -163,31 +171,67 @@ export class ReportesService {
   }
 
   async generarPdfInventario(): Promise<Buffer> {
-    const data = await this.dataSource.query('SELECT * FROM vista_inventario ORDER BY nombre ASC');
+    const data = await this.dataSource.query(
+      'SELECT * FROM vista_inventario ORDER BY nombre ASC',
+    );
 
     return new Promise((resolve) => {
-      const doc = new PDFDocument({ margin: 30, size: 'A4', layout: 'landscape' });
+      const doc = new PDFDocument({
+        margin: 30,
+        size: 'A4',
+        layout: 'landscape',
+      });
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk: Buffer) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-      doc.fontSize(18).font('Helvetica-Bold').text('KardexChio - Inventario General', { align: 'center' });
-      doc.fontSize(10).font('Helvetica').text(`Generado: ${new Date().toLocaleDateString('es-PE')}`, { align: 'center' });
+      doc
+        .fontSize(18)
+        .font('Helvetica-Bold')
+        .text('KardexChio - Inventario General', { align: 'center' });
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Generado: ${new Date().toLocaleDateString('es-PE')}`, {
+          align: 'center',
+        });
       doc.moveDown();
 
       const agotados = data.filter((r: any) => r.status === 'AGOTADO').length;
-      doc.fontSize(10).text(`Total recursos: ${data.length} | Agotados: ${agotados}`);
+      doc
+        .fontSize(10)
+        .text(`Total recursos: ${data.length} | Agotados: ${agotados}`);
       doc.moveDown();
 
-      const headers = ['Código', 'Recurso', 'Categoría', 'Unidad', 'Entradas', 'Salidas', 'Existencia', 'Status'];
+      const headers = [
+        'Código',
+        'Recurso',
+        'Categoría',
+        'Unidad',
+        'Entradas',
+        'Salidas',
+        'Existencia',
+        'Status',
+      ];
       const colWidths = [65, 230, 100, 60, 60, 60, 65, 80];
       let x = 30;
       const y = doc.y;
 
-      doc.rect(x, y, colWidths.reduce((a, b) => a + b, 0), 18).fill('#1E3A8A');
+      doc
+        .rect(
+          x,
+          y,
+          colWidths.reduce((a, b) => a + b, 0),
+          18,
+        )
+        .fill('#1E3A8A');
       headers.forEach((header, i) => {
-        doc.fillColor('white').fontSize(8).font('Helvetica-Bold').text(header, x + 2, y + 4, { width: colWidths[i] - 4 });
+        doc
+          .fillColor('white')
+          .fontSize(8)
+          .font('Helvetica-Bold')
+          .text(header, x + 2, y + 4, { width: colWidths[i] - 4 });
         x += colWidths[i];
       });
 
@@ -202,12 +246,40 @@ export class ReportesService {
           doc.addPage();
         }
 
-        const bgColor = row.status === 'AGOTADO' ? '#FEE2E2' : (r % 2 === 0 ? '#F9FAFB' : '#FFFFFF');
-        doc.rect(x, doc.y, colWidths.reduce((a, b) => a + b, 0), 14).fill(bgColor);
+        const bgColor =
+          row.status === 'AGOTADO'
+            ? '#FEE2E2'
+            : r % 2 === 0
+              ? '#F9FAFB'
+              : '#FFFFFF';
+        doc
+          .rect(
+            x,
+            doc.y,
+            colWidths.reduce((a, b) => a + b, 0),
+            14,
+          )
+          .fill(bgColor);
 
-        const values = [row.codigo, row.nombre, row.categoria, row.unidad, row.total_entradas, row.total_salidas, row.existencia_actual, row.status];
+        const values = [
+          row.codigo,
+          row.nombre,
+          row.categoria,
+          row.unidad,
+          row.total_entradas,
+          row.total_salidas,
+          row.existencia_actual,
+          row.status,
+        ];
         values.forEach((val, i) => {
-          doc.fillColor('#111827').fontSize(7).font('Helvetica').text(String(val ?? ''), x + 2, doc.y + 2, { width: colWidths[i] - 4, lineBreak: false });
+          doc
+            .fillColor('#111827')
+            .fontSize(7)
+            .font('Helvetica')
+            .text(String(val ?? ''), x + 2, doc.y + 2, {
+              width: colWidths[i] - 4,
+              lineBreak: false,
+            });
           x += colWidths[i];
         });
 
@@ -216,7 +288,11 @@ export class ReportesService {
 
       if (data.length > 100) {
         doc.moveDown();
-        doc.fontSize(8).text(`... y ${data.length - 100} recursos más. Descargue el Excel para el listado completo.`);
+        doc
+          .fontSize(8)
+          .text(
+            `... y ${data.length - 100} recursos más. Descargue el Excel para el listado completo.`,
+          );
       }
 
       doc.end();

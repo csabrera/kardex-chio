@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsEnum, IsEmail, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsEmail,
+  IsBoolean,
+} from 'class-validator';
 import { PersonaTipo } from '../persona.entity';
 
 export class UpdatePersonaDto {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MedioTransporte } from './medio-transporte.entity';
@@ -25,13 +29,19 @@ export class MediosTransporteService {
 
   async findOne(id: number) {
     const medio = await this.mediosTransporteRepo.findOne({ where: { id } });
-    if (!medio) throw new NotFoundException('Medio de transporte no encontrado');
+    if (!medio)
+      throw new NotFoundException('Medio de transporte no encontrado');
     return medio;
   }
 
   async create(dto: CreateMedioTransporteDto) {
-    const exists = await this.mediosTransporteRepo.findOne({ where: { nombre: dto.nombre } });
-    if (exists) throw new ConflictException('Ya existe un medio de transporte con ese nombre');
+    const exists = await this.mediosTransporteRepo.findOne({
+      where: { nombre: dto.nombre },
+    });
+    if (exists)
+      throw new ConflictException(
+        'Ya existe un medio de transporte con ese nombre',
+      );
 
     const medio = this.mediosTransporteRepo.create(dto);
     return this.mediosTransporteRepo.save(medio);
@@ -41,8 +51,13 @@ export class MediosTransporteService {
     const medio = await this.findOne(id);
 
     if (dto.nombre && dto.nombre !== medio.nombre) {
-      const exists = await this.mediosTransporteRepo.findOne({ where: { nombre: dto.nombre } });
-      if (exists) throw new ConflictException('Ya existe un medio de transporte con ese nombre');
+      const exists = await this.mediosTransporteRepo.findOne({
+        where: { nombre: dto.nombre },
+      });
+      if (exists)
+        throw new ConflictException(
+          'Ya existe un medio de transporte con ese nombre',
+        );
     }
 
     Object.assign(medio, dto);

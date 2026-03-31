@@ -21,10 +21,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: { sub: string; documento: string; rol: string }) {
-    const user = await this.usuariosRepo.findOne({ where: { id: payload.sub } });
+    const user = await this.usuariosRepo.findOne({
+      where: { id: payload.sub },
+    });
     if (!user || !user.activo) {
       throw new UnauthorizedException('Usuario no autorizado');
     }
-    return { id: user.id, tipo_documento: user.tipo_documento, documento: user.documento, nombre: user.nombre, apellido_paterno: user.apellido_paterno, rol: user.rol };
+    return {
+      id: user.id,
+      tipo_documento: user.tipo_documento,
+      documento: user.documento,
+      nombre: user.nombre,
+      apellido_paterno: user.apellido_paterno,
+      rol: user.rol,
+    };
   }
 }

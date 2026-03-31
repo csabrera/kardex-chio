@@ -18,7 +18,13 @@ export class MovimientosController {
     @Query('fecha_hasta') fecha_hasta?: string,
   ) {
     return this.movimientosService.findAll({
-      page, limit, tipo, recurso_id, equipo_id, fecha_desde, fecha_hasta,
+      page,
+      limit,
+      tipo,
+      recurso_id,
+      equipo_id,
+      fecha_desde,
+      fecha_hasta,
     });
   }
 }

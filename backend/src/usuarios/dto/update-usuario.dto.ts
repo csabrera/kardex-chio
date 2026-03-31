@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, MinLength, IsEmail, Matches, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  MinLength,
+  IsEmail,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { UserRole, TipoDocumento } from '../usuario.entity.js';
 
 export class UpdateUsuarioDto {
@@ -19,7 +28,9 @@ export class UpdateUsuarioDto {
   apellido_materno?: string;
 
   @IsString()
-  @Matches(/^9\d{8}$/, { message: 'El celular debe ser un número peruano de 9 dígitos' })
+  @Matches(/^9\d{8}$/, {
+    message: 'El celular debe ser un número peruano de 9 dígitos',
+  })
   @IsOptional()
   celular?: string;
 

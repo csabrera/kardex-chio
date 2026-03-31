@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UnidadMedida } from './unidad-medida.entity';
@@ -30,8 +34,13 @@ export class UnidadesMedidaService {
   }
 
   async create(dto: CreateUnidadMedidaDto) {
-    const existe = await this.unidadesMedidaRepo.findOne({ where: { codigo: dto.codigo } });
-    if (existe) throw new ConflictException('El código de unidad de medida ya está registrado');
+    const existe = await this.unidadesMedidaRepo.findOne({
+      where: { codigo: dto.codigo },
+    });
+    if (existe)
+      throw new ConflictException(
+        'El código de unidad de medida ya está registrado',
+      );
     const unidad = this.unidadesMedidaRepo.create(dto);
     return this.unidadesMedidaRepo.save(unidad);
   }
@@ -39,8 +48,13 @@ export class UnidadesMedidaService {
   async update(id: number, dto: UpdateUnidadMedidaDto) {
     const unidad = await this.findOne(id);
     if (dto.codigo && dto.codigo !== unidad.codigo) {
-      const existe = await this.unidadesMedidaRepo.findOne({ where: { codigo: dto.codigo } });
-      if (existe) throw new ConflictException('El código de unidad de medida ya está registrado');
+      const existe = await this.unidadesMedidaRepo.findOne({
+        where: { codigo: dto.codigo },
+      });
+      if (existe)
+        throw new ConflictException(
+          'El código de unidad de medida ya está registrado',
+        );
     }
     Object.assign(unidad, dto);
     return this.unidadesMedidaRepo.save(unidad);

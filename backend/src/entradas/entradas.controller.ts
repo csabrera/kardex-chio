@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { EntradasService } from './entradas.service';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,7 +31,14 @@ export class EntradasController {
     @Query('fecha_desde') fecha_desde?: string,
     @Query('fecha_hasta') fecha_hasta?: string,
   ) {
-    return this.entradasService.findAll({ page, limit, search, categoria_id, fecha_desde, fecha_hasta });
+    return this.entradasService.findAll({
+      page,
+      limit,
+      search,
+      categoria_id,
+      fecha_desde,
+      fecha_hasta,
+    });
   }
 
   @Get(':id')

@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FrenteTrabajo } from './frente-trabajo.entity';
@@ -30,7 +34,9 @@ export class FrentesTrabajoService {
   }
 
   async create(dto: CreateFrenteTrabajoDto) {
-    const exists = await this.frentesTrabajoRepo.findOne({ where: { codigo: dto.codigo } });
+    const exists = await this.frentesTrabajoRepo.findOne({
+      where: { codigo: dto.codigo },
+    });
     if (exists) throw new ConflictException('El código ya está registrado');
 
     const frente = this.frentesTrabajoRepo.create(dto);
@@ -41,7 +47,9 @@ export class FrentesTrabajoService {
     const frente = await this.findOne(id);
 
     if (dto.codigo && dto.codigo !== frente.codigo) {
-      const exists = await this.frentesTrabajoRepo.findOne({ where: { codigo: dto.codigo } });
+      const exists = await this.frentesTrabajoRepo.findOne({
+        where: { codigo: dto.codigo },
+      });
       if (exists) throw new ConflictException('El código ya está registrado');
     }
 

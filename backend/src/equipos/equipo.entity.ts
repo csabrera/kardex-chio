@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Categoria } from '../categorias/categoria.entity.js';
 import { UnidadMedida } from '../unidades-medida/unidad-medida.entity.js';
 
@@ -30,7 +38,11 @@ export class Equipo {
   @JoinColumn({ name: 'unidad_medida_id' })
   unidadMedida: UnidadMedida;
 
-  @Column({ type: 'enum', enum: EquipoEstado, default: EquipoEstado.EN_ALMACEN })
+  @Column({
+    type: 'enum',
+    enum: EquipoEstado,
+    default: EquipoEstado.EN_ALMACEN,
+  })
   estado: EquipoEstado;
 
   @Column({ default: true })

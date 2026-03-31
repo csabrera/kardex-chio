@@ -17,12 +17,24 @@ export class DashboardService {
       entradasPorMes,
       salidasPorMes,
     ] = await Promise.all([
-      this.dataSource.query('SELECT COUNT(*) as total FROM recursos WHERE activo = TRUE'),
-      this.dataSource.query('SELECT COUNT(*) as total, COALESCE(SUM(cantidad), 0) as cantidad_total FROM entradas'),
-      this.dataSource.query('SELECT COUNT(*) as total, COALESCE(SUM(cantidad), 0) as cantidad_total FROM salidas'),
-      this.dataSource.query("SELECT COUNT(*) as total FROM vista_inventario WHERE status = 'AGOTADO'"),
-      this.dataSource.query('SELECT COUNT(*) as total FROM equipos WHERE activo = TRUE'),
-      this.dataSource.query('SELECT c.nombre, COUNT(r.id) as total FROM categorias c LEFT JOIN recursos r ON c.id = r.categoria_id AND r.activo = TRUE WHERE c.activo = TRUE GROUP BY c.id, c.nombre ORDER BY total DESC'),
+      this.dataSource.query(
+        'SELECT COUNT(*) as total FROM recursos WHERE activo = TRUE',
+      ),
+      this.dataSource.query(
+        'SELECT COUNT(*) as total, COALESCE(SUM(cantidad), 0) as cantidad_total FROM entradas',
+      ),
+      this.dataSource.query(
+        'SELECT COUNT(*) as total, COALESCE(SUM(cantidad), 0) as cantidad_total FROM salidas',
+      ),
+      this.dataSource.query(
+        "SELECT COUNT(*) as total FROM vista_inventario WHERE status = 'AGOTADO'",
+      ),
+      this.dataSource.query(
+        'SELECT COUNT(*) as total FROM equipos WHERE activo = TRUE',
+      ),
+      this.dataSource.query(
+        'SELECT c.nombre, COUNT(r.id) as total FROM categorias c LEFT JOIN recursos r ON c.id = r.categoria_id AND r.activo = TRUE WHERE c.activo = TRUE GROUP BY c.id, c.nombre ORDER BY total DESC',
+      ),
       this.dataSource.query(`
         SELECT m.id, m.tipo, m.cantidad, m.fecha, m.descripcion, m.created_at,
                r.nombre as recurso_nombre, r.codigo as recurso_codigo,

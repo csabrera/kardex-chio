@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional, Matches, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  IsOptional,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 
 export class CompletarPerfilDto {
   @IsString()
@@ -18,7 +25,10 @@ export class CompletarPerfilDto {
 
   @IsString()
   @IsNotEmpty({ message: 'El celular es obligatorio' })
-  @Matches(/^9\d{8}$/, { message: 'El celular debe ser un número peruano de 9 dígitos que empiece con 9' })
+  @Matches(/^9\d{8}$/, {
+    message:
+      'El celular debe ser un número peruano de 9 dígitos que empiece con 9',
+  })
   celular: string;
 
   @IsEmail({}, { message: 'El email debe ser válido' })

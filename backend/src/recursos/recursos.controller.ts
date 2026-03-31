@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { RecursosService } from './recursos.service';
 import { CreateRecursoDto } from './dto/create-recurso.dto';
 import { UpdateRecursoDto } from './dto/update-recurso.dto';
@@ -20,7 +31,13 @@ export class RecursosController {
     @Query('categoria_id') categoria_id?: number,
     @Query('status') status?: string,
   ) {
-    return this.recursosService.findAll({ page, limit, search, categoria_id, status });
+    return this.recursosService.findAll({
+      page,
+      limit,
+      search,
+      categoria_id,
+      status,
+    });
   }
 
   @Get(':id')

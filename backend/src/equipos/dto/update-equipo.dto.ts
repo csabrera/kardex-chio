@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 import { EquipoEstado } from '../equipo.entity';
 
 export class UpdateEquipoDto {
