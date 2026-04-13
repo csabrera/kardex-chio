@@ -4,7 +4,6 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { CategoriasModule } from './categorias/categorias.module';
-import { DatabaseModule } from './database/database.module';
 import { UnidadesMedidaModule } from './unidades-medida/unidades-medida.module';
 import { PersonasModule } from './personas/personas.module';
 import { FrentesTrabajoModule } from './frentes-trabajo/frentes-trabajo.module';
@@ -57,7 +56,6 @@ import { ReportesModule } from './reportes/reportes.module';
         };
       },
     }),
-    DatabaseModule,
     AuthModule,
     UsuariosModule,
     CategoriasModule,
