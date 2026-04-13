@@ -112,20 +112,36 @@ export default function ReportesPage() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() =>
-              downloadFile(
-                `/reportes/entradas/excel${buildDateParams(entradasDesde, entradasHasta)}`,
-                'entradas.xlsx',
-                'ent-excel'
-              )
-            }
-            disabled={downloading === 'ent-excel'}
-            className="w-full btn-primary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-          >
-            {downloading === 'ent-excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            Descargar Excel
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() =>
+                downloadFile(
+                  `/reportes/entradas/excel${buildDateParams(entradasDesde, entradasHasta)}`,
+                  'entradas.xlsx',
+                  'ent-excel'
+                )
+              }
+              disabled={downloading === 'ent-excel'}
+              className="flex-1 btn-primary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+            >
+              {downloading === 'ent-excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
+              Excel
+            </button>
+            <button
+              onClick={() =>
+                downloadFile(
+                  `/reportes/entradas/pdf${buildDateParams(entradasDesde, entradasHasta)}`,
+                  'entradas.pdf',
+                  'ent-pdf'
+                )
+              }
+              disabled={downloading === 'ent-pdf'}
+              className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+            >
+              {downloading === 'ent-pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+              PDF
+            </button>
+          </div>
         </div>
 
         {/* Reporte de Salidas */}
@@ -164,20 +180,36 @@ export default function ReportesPage() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() =>
-              downloadFile(
-                `/reportes/salidas/excel${buildDateParams(salidasDesde, salidasHasta)}`,
-                'salidas.xlsx',
-                'sal-excel'
-              )
-            }
-            disabled={downloading === 'sal-excel'}
-            className="w-full btn-primary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-          >
-            {downloading === 'sal-excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            Descargar Excel
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() =>
+                downloadFile(
+                  `/reportes/salidas/excel${buildDateParams(salidasDesde, salidasHasta)}`,
+                  'salidas.xlsx',
+                  'sal-excel'
+                )
+              }
+              disabled={downloading === 'sal-excel'}
+              className="flex-1 btn-primary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+            >
+              {downloading === 'sal-excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
+              Excel
+            </button>
+            <button
+              onClick={() =>
+                downloadFile(
+                  `/reportes/salidas/pdf${buildDateParams(salidasDesde, salidasHasta)}`,
+                  'salidas.pdf',
+                  'sal-pdf'
+                )
+              }
+              disabled={downloading === 'sal-pdf'}
+              className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+            >
+              {downloading === 'sal-pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+              PDF
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -23,7 +23,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Recursos', href: '/dashboard/recursos', icon: Package },
-  { name: 'Gestión de Equipos', href: '/dashboard/gestion-equipos', icon: Wrench },
+  { name: 'Equipos', href: '/dashboard/gestion-equipos', icon: Wrench },
   { name: 'Movimientos', href: '/dashboard/movimientos', icon: History },
   { name: 'Reportes', href: '/dashboard/reportes', icon: FileSpreadsheet },
 ];

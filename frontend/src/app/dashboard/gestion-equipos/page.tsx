@@ -22,8 +22,8 @@ interface FrenteTrabajo {
 
 const TABS = [
   { id: 'equipos' as const, label: 'Equipos', icon: Wrench },
-  { id: 'salida-equipos' as const, label: 'Salida Equipos', icon: Truck },
   { id: 'entrada-equipos' as const, label: 'Entrada Equipos', icon: ArrowDownToLine },
+  { id: 'salida-equipos' as const, label: 'Salida Equipos', icon: Truck },
 ];
 
 export default function GestionEquiposPage() {

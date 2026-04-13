@@ -68,4 +68,34 @@ export class ReportesController {
     await workbook.xlsx.write(res);
     res.end();
   }
+
+  @Get('entradas/pdf')
+  async entradaspdf(
+    @Res() res: Response,
+    @Query('fecha_desde') fechaDesde?: string,
+    @Query('fecha_hasta') fechaHasta?: string,
+  ) {
+    const buffer = await this.reportesService.generarPdfEntradas(
+      fechaDesde,
+      fechaHasta,
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=entradas.pdf');
+    res.send(buffer);
+  }
+
+  @Get('salidas/pdf')
+  async salidaspdf(
+    @Res() res: Response,
+    @Query('fecha_desde') fechaDesde?: string,
+    @Query('fecha_hasta') fechaHasta?: string,
+  ) {
+    const buffer = await this.reportesService.generarPdfSalidas(
+      fechaDesde,
+      fechaHasta,
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=salidas.pdf');
+    res.send(buffer);
+  }
 }
