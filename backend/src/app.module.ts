@@ -1,9 +1,6 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import * as fs from 'fs';
-import * as path from 'path';
 import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { CategoriasModule } from './categorias/categorias.module';
@@ -60,6 +57,7 @@ import { ReportesModule } from './reportes/reportes.module';
         };
       },
     }),
+    DatabaseModule,
     AuthModule,
     UsuariosModule,
     CategoriasModule,
@@ -78,19 +76,4 @@ import { ReportesModule } from './reportes/reportes.module';
     ReportesModule,
   ],
 })
-export class AppModule implements OnModuleInit {
-  constructor(private dataSource: DataSource) {}
-
-  async onModuleInit() {
-    try {
-      const sqlPath = path.join(__dirname, '../../..', 'database', 'init.sql');
-      if (fs.existsSync(sqlPath)) {
-        const sql = fs.readFileSync(sqlPath, 'utf8');
-        await this.dataSource.query(sql);
-        console.log('[✓] Database schema initialized');
-      }
-    } catch (error) {
-      console.error('[✗] Database initialization failed (tables may already exist):', error.message);
-    }
-  }
-}
+export class AppModule {}
