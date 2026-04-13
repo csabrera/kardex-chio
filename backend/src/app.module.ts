@@ -53,7 +53,7 @@ import { ReportesModule } from './reportes/reportes.module';
           ),
           database: configService.get<string>('POSTGRES_DB', 'kardexchio'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: false,
+          synchronize: true,
         };
       },
     }),
