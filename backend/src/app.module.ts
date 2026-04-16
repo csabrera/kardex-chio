@@ -3,6 +3,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions, getDataSourceToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { HealthController } from './health.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { CategoriasModule } from './categorias/categorias.module';
@@ -21,6 +22,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportesModule } from './reportes/reportes.module';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
