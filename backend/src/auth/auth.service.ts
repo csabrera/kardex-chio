@@ -17,6 +17,8 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
+    console.log(`[AUTH] Login attempt for documento: ${loginDto.documento}`);
+
     const user = await this.usuariosRepo.findOne({
       where: {
         documento: loginDto.documento,
@@ -25,6 +27,8 @@ export class AuthService {
         }),
       },
     });
+
+    console.log(`[AUTH] User found: ${user ? 'yes' : 'no'}, Active: ${user?.activo}`);
 
     if (!user || !user.activo) {
       throw new UnauthorizedException('Credenciales incorrectas');
