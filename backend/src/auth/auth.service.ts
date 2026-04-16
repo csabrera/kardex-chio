@@ -34,10 +34,12 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
+    console.log(`[AUTH] Comparing password. Hash preview: ${user.password.substring(0, 20)}...`);
     const isPasswordValid = await bcrypt.compare(
       loginDto.password,
       user.password,
     );
+    console.log(`[AUTH] Password valid: ${isPasswordValid}`);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
