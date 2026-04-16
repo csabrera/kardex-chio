@@ -41,8 +41,6 @@ import { ReportesModule } from './reportes/reportes.module';
             ssl: { rejectUnauthorized: false },
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
             synchronize: false,
-            connectTimeoutMS: 5000,
-            acquireConnectionTimeout: 5000,
           };
         }
 
