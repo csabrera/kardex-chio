@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import DataTable from '@/components/DataTable';
@@ -66,12 +66,47 @@ export default function EntradaEquiposTab({ personas, frentesTrabajo }: EntradaE
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
+  // Search selector for equipos
+  const [equipoSearch, setEquipoSearch] = useState('');
+  const [equiposSuggestions, setEquiposSuggestions] = useState<Equipo[]>([]);
+  const [equipoDropdown, setEquipoDropdown] = useState(false);
+  const [selectedEquipo, setSelectedEquipo] = useState<Equipo | null>(null);
+  const equipoRef = useRef<HTMLDivElement>(null);
+
   const canCreate = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
   const canDelete = user?.rol === 'ADMIN';
 
   useEffect(() => {
     api.get('/equipos').then(res => setEquipos(res.data)).catch(console.error);
   }, []);
+
+  // Handle click outside dropdown
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (equipoRef.current && !equipoRef.current.contains(e.target as Node)) {
+        setEquipoDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Search equipos while typing
+  useEffect(() => {
+    if (!equipoSearch || equipoSearch.length < 2) {
+      setEquiposSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get('/equipos', { params: { search: equipoSearch, limit: 10 } });
+        setEquiposSuggestions(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [equipoSearch]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -107,8 +142,17 @@ export default function EntradaEquiposTab({ personas, frentesTrabajo }: EntradaE
       quien_entrega_id: '',
       quien_recibe_id: '',
     });
+    setEquipoSearch('');
+    setSelectedEquipo(null);
     setFormError('');
     setModal(true);
+  };
+
+  const selectEquipo = (equipo: Equipo) => {
+    setSelectedEquipo(equipo);
+    setForm({ ...form, equipo_id: String(equipo.id) });
+    setEquipoSearch(equipo.nombre);
+    setEquipoDropdown(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -254,17 +298,43 @@ export default function EntradaEquiposTab({ personas, frentesTrabajo }: EntradaE
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div ref={equipoRef} className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">Equipo</label>
-              <select
-                value={form.equipo_id}
-                onChange={(e) => setForm({ ...form, equipo_id: e.target.value })}
+              <input
+                type="text"
+                value={equipoSearch}
+                onChange={(e) => {
+                  setEquipoSearch(e.target.value);
+                  setEquipoDropdown(true);
+                  if (selectedEquipo) {
+                    setSelectedEquipo(null);
+                    setForm({ ...form, equipo_id: '' });
+                  }
+                }}
+                onFocus={() => equipoSearch.length >= 2 && setEquipoDropdown(true)}
                 className="input-field"
+                placeholder="Escriba para buscar un equipo..."
                 required
-              >
-                <option value="">Seleccionar equipo...</option>
-                {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
-              </select>
+              />
+              {equipoDropdown && equiposSuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {equiposSuggestions.map((eq) => (
+                    <button
+                      key={eq.id}
+                      type="button"
+                      onClick={() => selectEquipo(eq)}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-primary-50 transition-colors"
+                    >
+                      <span className="font-medium text-gray-700">{eq.nombre}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {equipoDropdown && equipoSearch.length >= 2 && equiposSuggestions.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm text-gray-400 text-center">
+                  No se encontraron equipos
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>

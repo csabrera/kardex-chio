@@ -27,7 +27,7 @@ DB_CONFIG = {
     "dbname": "kardexchio",
 }
 
-EXCEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Kardex fica 2026.xlsx")
+EXCEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Kardex_Importacion_2026.xlsx")
 
 # Category prefixes for generating codes when missing
 CATEGORY_PREFIXES = {

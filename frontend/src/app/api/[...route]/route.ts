@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = 'https://backend-production-14c8.up.railway.app';
+const BACKEND_URL = process.env.NODE_ENV === 'production'
+  ? 'https://backend-production-14c8.up.railway.app'
+  : 'http://localhost:3001';
 
 export async function GET(
   request: NextRequest,

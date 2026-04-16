@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import DataTable from '@/components/DataTable';
@@ -41,6 +41,13 @@ export default function EquiposPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
+  // Search selector state
+  const [equipoSearch, setEquipoSearch] = useState('');
+  const [equiposSuggestions, setEquiposSuggestions] = useState<Equipo[]>([]);
+  const [equipoDropdown, setEquipoDropdown] = useState(false);
+  const [selectedEquipo, setSelectedEquipo] = useState<Equipo | null>(null);
+  const equipoRef = useRef<HTMLDivElement>(null);
+
   const canEdit = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
   const canDelete = user?.rol === 'ADMIN';
 
@@ -49,6 +56,34 @@ export default function EquiposPage() {
     api.get('/unidades-medida/activos').then(res => setUnidadesMedida(res.data)).catch(console.error);
   }, []);
 
+  // Handle click outside dropdown
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (equipoRef.current && !equipoRef.current.contains(e.target as Node)) {
+        setEquipoDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Search equipos while typing
+  useEffect(() => {
+    if (!equipoSearch || equipoSearch.length < 2) {
+      setEquiposSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get('/equipos', { params: { search: equipoSearch, limit: 10 } });
+        setEquiposSuggestions(Array.isArray(res.data) ? res.data : res.data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [equipoSearch]);
+
   const fetchEquipos = useCallback(async () => {
     setLoading(true);
     try {
@@ -56,7 +91,7 @@ export default function EquiposPage() {
       if (search) params.search = search;
       if (estadoFilter) params.estado = estadoFilter;
       const res = await api.get('/equipos', { params });
-      setEquipos(res.data);
+      setEquipos(Array.isArray(res.data) ? res.data : res.data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -72,6 +107,8 @@ export default function EquiposPage() {
   const openNew = () => {
     setEditing(null);
     setForm({ nombre: '', categoria_id: '', unidad_medida_id: '', estado: 'EN_ALMACEN' });
+    setEquipoSearch('');
+    setSelectedEquipo(null);
     setFormError('');
     setModal(true);
   };
@@ -84,8 +121,22 @@ export default function EquiposPage() {
       unidad_medida_id: equipo.unidadMedida?.id?.toString() || '',
       estado: equipo.estado,
     });
+    setEquipoSearch(equipo.nombre);
+    setSelectedEquipo(equipo);
     setFormError('');
     setModal(true);
+  };
+
+  const selectEquipo = (equipo: Equipo) => {
+    setSelectedEquipo(equipo);
+    setForm({
+      nombre: equipo.nombre,
+      categoria_id: equipo.categoria?.id?.toString() || '',
+      unidad_medida_id: equipo.unidadMedida?.id?.toString() || '',
+      estado: equipo.estado,
+    });
+    setEquipoSearch(equipo.nombre);
+    setEquipoDropdown(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,16 +247,48 @@ export default function EquiposPage() {
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+
+          <div ref={equipoRef} className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre {!editing && '(escriba para buscar)'}</label>
             <input
               type="text"
-              value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              value={equipoSearch}
+              onChange={(e) => {
+                setEquipoSearch(e.target.value);
+                setEquipoDropdown(true);
+                setForm({ ...form, nombre: e.target.value });
+              }}
+              onFocus={() => equipoSearch.length >= 2 && setEquipoDropdown(true)}
               className="input-field"
+              placeholder={editing ? form.nombre : 'Escriba para buscar o crear nuevo...'}
               required
             />
+            {equipoDropdown && equiposSuggestions.length > 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {equiposSuggestions.map((eq) => (
+                  <button
+                    key={eq.id}
+                    type="button"
+                    onClick={() => selectEquipo(eq)}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-primary-50 transition-colors flex justify-between items-center"
+                  >
+                    <span>
+                      <span className="font-medium text-gray-700">{eq.nombre}</span>
+                      <span className="mx-2 text-gray-300">|</span>
+                      <span className="text-gray-600">{eq.categoria?.nombre || 'Sin categoría'}</span>
+                    </span>
+                    <span className="text-xs text-gray-400">{eq.estado}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {equipoDropdown && equipoSearch.length >= 2 && equiposSuggestions.length === 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm text-gray-400 text-center">
+                No se encontraron equipos - Crear nuevo
+              </div>
+            )}
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
