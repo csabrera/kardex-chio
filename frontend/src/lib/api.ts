@@ -1,19 +1,23 @@
 import axios from 'axios';
 
-// Get API URL from environment variable or window location
+// Get API URL dynamically based on current environment
 const getApiUrl = () => {
-  if (typeof window !== 'undefined') {
-    // In browser: use environment variable or construct from current host
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (envUrl) return envUrl;
-
-    // Fallback: if on production domain, use it
-    if (window.location.hostname !== 'localhost') {
-      return `${window.location.protocol}//backend-production-14c8.up.railway.app/api`;
-    }
+  // Only run on client-side
+  if (typeof window === 'undefined') {
+    return 'http://localhost:3011/api';
   }
-  // Server-side or default
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011/api';
+
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+
+  // Production environments
+  if (hostname.includes('railway.app') || hostname.includes('yourdomain.com')) {
+    // Use the hardcoded production Backend URL
+    return 'https://backend-production-14c8.up.railway.app/api';
+  }
+
+  // Local development
+  return 'http://localhost:3011/api';
 };
 
 const api = axios.create({
