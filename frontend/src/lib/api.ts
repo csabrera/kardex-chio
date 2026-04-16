@@ -1,32 +1,36 @@
+'use client';
+
 import axios, { AxiosInstance } from 'axios';
 
-let api: AxiosInstance;
+let api: AxiosInstance | null = null;
 
-// Initialize API client - called on client-side
-const initializeApi = (): AxiosInstance => {
-  if (api) return api;
-
-  // Determine API URL based on environment
-  let baseURL = 'http://localhost:3011/api';
-
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-
-    // Production: Railway deployment
-    if (hostname.includes('railway.app')) {
-      baseURL = 'https://backend-production-14c8.up.railway.app/api';
-    }
+function getApiBaseUrl(): string {
+  // Only in browser
+  if (typeof window === 'undefined') {
+    return 'http://localhost:3011/api';
   }
 
-  api = axios.create({
-    baseURL,
+  const { hostname } = window.location;
+
+  // Railway production
+  if (hostname.includes('railway.app')) {
+    return 'https://backend-production-14c8.up.railway.app/api';
+  }
+
+  // Local development
+  return 'http://localhost:3011/api';
+}
+
+function createApiInstance(): AxiosInstance {
+  const instance = axios.create({
+    baseURL: getApiBaseUrl(),
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
-  // Request interceptor: add auth token
-  api.interceptors.request.use((config) => {
+  // Request: Add token
+  instance.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
@@ -36,8 +40,8 @@ const initializeApi = (): AxiosInstance => {
     return config;
   });
 
-  // Response interceptor: handle 401
-  api.interceptors.response.use(
+  // Response: Handle 401
+  instance.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401 && typeof window !== 'undefined') {
@@ -48,13 +52,14 @@ const initializeApi = (): AxiosInstance => {
     }
   );
 
-  return api;
-};
+  return instance;
+}
 
-// Export a proxy that initializes the API on first use
-export default new Proxy({} as AxiosInstance, {
-  get(target, prop) {
-    const instance = initializeApi();
-    return Reflect.get(instance, prop);
-  },
-});
+function getApi(): AxiosInstance {
+  if (!api) {
+    api = createApiInstance();
+  }
+  return api;
+}
+
+export default getApi();
