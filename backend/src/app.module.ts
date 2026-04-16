@@ -38,7 +38,7 @@ import { ReportesModule } from './reportes/reportes.module';
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
-            synchronize: true,
+            synchronize: false,
           };
         }
 
