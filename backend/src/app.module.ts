@@ -95,14 +95,27 @@ export class AppModule implements OnModuleInit {
       // Verificar si la tabla usuarios existe
       const tableExists = await queryRunner.hasTable('usuarios');
 
-      if (tableExists) {
+      if (!tableExists) {
+        console.log('🔄 Initializing database with seed data...');
+        // Las tablas deben ser creadas previamente via init.sql o TypeORM
+        // Este es un fallback en caso de que no existan
+        console.error('✗ usuarios table does not exist - database schema must be initialized separately');
+        return;
+      }
+
+      // Verificar si el usuario admin existe
+      const adminExists = await queryRunner.query(
+        "SELECT 1 FROM usuarios WHERE documento = '00000000' LIMIT 1"
+      );
+
+      if (adminExists && adminExists.length > 0) {
         console.log('✓ Database already initialized');
         return;
       }
 
-      console.log('🔄 Initializing database with seed data...');
+      // Si la tabla existe pero el usuario admin no, crear los datos iniciales
+      console.log('🔄 Creating seed data...');
 
-      // Insertar datos iniciales
       await queryRunner.query(`
         INSERT INTO categorias (nombre) VALUES
           ('Ferretería'),
@@ -144,7 +157,7 @@ export class AppModule implements OnModuleInit {
         ON CONFLICT (documento) DO NOTHING
       `);
 
-      console.log('✓ Database initialized successfully with seed data');
+      console.log('✓ Seed data created successfully');
     } catch (error) {
       console.error('✗ Database initialization error:', error.message);
       // No lanzar error para permitir que continúe el startup
