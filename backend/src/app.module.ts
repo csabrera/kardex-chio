@@ -82,11 +82,10 @@ export class AppModule implements OnModuleInit {
   constructor(private dataSource: DataSource) {}
 
   async onModuleInit() {
-    try {
-      await this.initializeDatabase();
-    } catch (error) {
+    // Run database initialization in background without blocking startup
+    this.initializeDatabase().catch(error => {
       console.error('Failed to initialize database:', error);
-    }
+    });
   }
 
   private async initializeDatabase() {
