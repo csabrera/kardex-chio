@@ -3,6 +3,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions, getDataSourceToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { initializeSchema } from './database/initialize-schema';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -83,86 +84,8 @@ export class AppModule implements OnModuleInit {
 
   async onModuleInit() {
     // Run database initialization in background without blocking startup
-    this.initializeDatabase().catch(error => {
-      console.error('Failed to initialize database:', error);
+    initializeSchema(this.dataSource).catch(error => {
+      console.error('Failed to initialize database schema:', error);
     });
-  }
-
-  private async initializeDatabase() {
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    try {
-      // Verificar si la tabla usuarios existe
-      const tableExists = await queryRunner.hasTable('usuarios');
-
-      if (!tableExists) {
-        console.log('🔄 Initializing database with seed data...');
-        // Las tablas deben ser creadas previamente via init.sql o TypeORM
-        // Este es un fallback en caso de que no existan
-        console.error('✗ usuarios table does not exist - database schema must be initialized separately');
-        return;
-      }
-
-      // Verificar si el usuario admin existe
-      const adminExists = await queryRunner.query(
-        "SELECT 1 FROM usuarios WHERE documento = '00000000' LIMIT 1"
-      );
-
-      if (adminExists && adminExists.length > 0) {
-        console.log('✓ Database already initialized');
-        return;
-      }
-
-      // Si la tabla existe pero el usuario admin no, crear los datos iniciales
-      console.log('🔄 Creating seed data...');
-
-      await queryRunner.query(`
-        INSERT INTO categorias (nombre) VALUES
-          ('Ferretería'),
-          ('Pintura'),
-          ('Eléctrico'),
-          ('Seguridad'),
-          ('Maderas'),
-          ('Herramientas'),
-          ('Limpieza'),
-          ('Materiales de Construcción'),
-          ('Combustibles'),
-          ('Alimentos y Bebidas'),
-          ('Oficina'),
-          ('Equipos')
-        ON CONFLICT (nombre) DO NOTHING
-      `);
-
-      await queryRunner.query(`
-        INSERT INTO unidades_medida (codigo, nombre) VALUES
-          ('UND', 'Unidad'),
-          ('KG', 'Kilogramo'),
-          ('LT', 'Litro'),
-          ('M', 'Metro'),
-          ('M2', 'Metro cuadrado'),
-          ('BLS', 'Bolsa'),
-          ('GLN', 'Galón'),
-          ('RLL', 'Rollo'),
-          ('PAR', 'Par'),
-          ('CJA', 'Caja'),
-          ('PZA', 'Pieza'),
-          ('PLG', 'Pliego')
-        ON CONFLICT (codigo) DO NOTHING
-      `);
-
-      // Usuario admin (password: 00000000)
-      await queryRunner.query(`
-        INSERT INTO usuarios (tipo_documento, documento, password, rol, primer_inicio, nombre, apellido_paterno, apellido_materno)
-        VALUES ('DNI', '00000000', '$2b$10$N1GIjsmwKS/j2bJRWFhJoeudFOIZk16oCamYleYr1qKOODOTYJ1cO', 'ADMIN', FALSE, 'Administrador', 'Sistema', 'Admin')
-        ON CONFLICT (documento) DO NOTHING
-      `);
-
-      console.log('✓ Seed data created successfully');
-    } catch (error) {
-      console.error('✗ Database initialization error:', error.message);
-      // No lanzar error para permitir que continúe el startup
-    } finally {
-      await queryRunner.release();
-    }
   }
 }
