@@ -33,10 +33,10 @@ export default function PrimerInicioPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.replace('/login');
     }
     if (!isLoading && user && !user.primer_inicio) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
     }
   }, [user, isLoading, router]);
 

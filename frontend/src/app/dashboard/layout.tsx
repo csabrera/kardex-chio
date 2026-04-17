@@ -17,13 +17,13 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.replace('/login');
     }
   }, [user, isLoading, router]);
 
   useEffect(() => {
     if (!isLoading && user && user.primer_inicio) {
-      router.push('/primer-inicio');
+      router.replace('/primer-inicio');
     }
   }, [user, isLoading, router]);
 

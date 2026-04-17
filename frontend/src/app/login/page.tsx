@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,7 +19,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { login: authLogin } = useAuth();
+  const { login: authLogin, user, isLoading } = useAuth();
+
+  // Si ya estás autenticado, redirige al dashboard
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, isLoading, router]);
 
   const docType = DOCUMENT_TYPES.find(d => d.value === tipoDocumento)!;
 
@@ -57,9 +64,9 @@ export default function LoginPage() {
       authLogin(data.access_token, data.user);
 
       if (data.user.primer_inicio) {
-        router.push('/primer-inicio');
+        router.replace('/primer-inicio');
       } else {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       }
     } catch {
       showError('Error de conexión con el servidor');
