@@ -183,17 +183,17 @@ export default function PersonasPage() {
 
   const columns = [
     {
-      header: 'Tipo', key: 'tipo', className: 'w-32',
+      header: 'Tipo', key: 'tipo', className: 'w-32', hideOnMobile: true,
       render: (item: Persona) => tipoBadge(item.tipo),
     },
-    { header: 'Nombre', key: 'nombre' },
+    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
     { header: 'Documento', key: 'documento', className: 'w-32',
       render: (item: Persona) => item.documento || <span className="text-gray-400 italic">-</span>,
     },
-    { header: 'Email', key: 'email',
+    { header: 'Email', key: 'email', hideOnMobile: true,
       render: (item: Persona) => item.email || <span className="text-gray-400 italic">-</span>,
     },
-    { header: 'Teléfono', key: 'telefono', className: 'w-32',
+    { header: 'Teléfono', key: 'telefono', className: 'w-32', hideOnMobile: true,
       render: (item: Persona) => item.telefono || <span className="text-gray-400 italic">-</span>,
     },
     {
@@ -205,14 +205,16 @@ export default function PersonasPage() {
       ),
     },
     {
-      header: 'Acciones', key: 'actions', className: 'w-24',
+      header: 'Acciones', key: 'actions', className: 'w-24 flex-shrink-0 text-center',
       render: (item: Persona) => (
-        <div className="flex items-center gap-1">
-          <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Editar">
-            <Pencil className="w-4 h-4" />
+        <div className="flex items-center justify-center gap-1">
+          <button onClick={() => openEdit(item)} className="p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Editar">
+            <Pencil className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Editar</span>
           </button>
-          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-            <Trash2 className="w-4 h-4" />
+          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Eliminar">
+            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Eliminar</span>
           </button>
         </div>
       ),

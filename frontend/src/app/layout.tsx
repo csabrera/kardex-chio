@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
+import { Outfit, JetBrains_Mono } from 'next/font/google';
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  weight: ['300', '400', '500', '600', '700'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  weight: ['400', '500', '600'],
+});
 
 export const metadata: Metadata = {
   title: "KardexChio - Sistema de Control de Almacen",
@@ -13,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body>
+    <html lang="es" className={`${outfit.variable} ${jetbrainsMono.variable}`}>
+      <body className="font-sans">
         <AuthProvider>
           {children}
         </AuthProvider>

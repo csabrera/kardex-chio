@@ -143,34 +143,34 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
   };
 
   const columns = [
-    { header: 'Código', key: 'codigo', className: 'w-24' },
-    { header: 'Recurso', key: 'nombre' },
-    { header: 'Categoría', key: 'categoria', className: 'w-28' },
-    { header: 'Unidad', key: 'unidad', className: 'w-20' },
+    { header: 'Código', key: 'codigo' },
+    { header: 'Recurso', key: 'nombre', maxWidth: '250px' },
+    { header: 'Categoría', key: 'categoria' },
+    { header: 'Unidad', key: 'unidad' },
     {
-      header: 'Entradas', key: 'total_entradas', className: 'w-24 text-center',
+      header: 'Entradas', key: 'total_entradas', className: 'text-center',
       render: (item: Recurso) => (
         <span className="text-emerald-600 font-medium">{item.total_entradas}</span>
       ),
     },
     {
-      header: 'Salidas', key: 'total_salidas', className: 'w-24 text-center',
+      header: 'Salidas', key: 'total_salidas', className: 'text-center',
       render: (item: Recurso) => (
         <span className="text-amber-600 font-medium">{item.total_salidas}</span>
       ),
     },
     {
-      header: 'Existencia', key: 'existencia_actual', className: 'w-24 text-center',
+      header: 'Existencia', key: 'existencia_actual', className: 'text-center',
       render: (item: Recurso) => (
         <span className="font-bold">{item.existencia_actual}</span>
       ),
     },
     {
-      header: 'Status', key: 'status', className: 'w-32',
+      header: 'Status', key: 'status',
       render: (item: Recurso) => <StatusBadge status={item.status} />,
     },
     {
-      header: 'Acciones', key: 'actions', className: 'w-20',
+      header: 'Acciones', key: 'actions', className: 'w-16 flex-shrink-0 text-center',
       render: (item: Recurso) => (
         <button
           onClick={() => openHistorial(item.id)}
@@ -185,41 +185,48 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="card">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-[250px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="card p-3 md:p-6">
+        <div className="space-y-3 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-4">
+          {/* Search - Full width on mobile, flex on desktop */}
+          <div className="flex-1 min-w-full md:min-w-[250px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Buscar por nombre o código..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="input-field pl-10"
+              className="input-field pl-10 text-sm md:text-base"
             />
           </div>
-          <select
-            value={categoriaId}
-            onChange={(e) => { setCategoriaId(e.target.value); setPage(1); }}
-            className="input-field w-48"
-          >
-            <option value="">Todas las categorías</option>
-            {categorias.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-            ))}
-          </select>
-          <select
-            value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="input-field w-44"
-          >
-            <option value="">Todos los status</option>
-            <option value="DISPONIBLE">Disponible</option>
-            <option value="AGOTADO">Agotado</option>
-          </select>
+
+          {/* Selects - Grid on mobile, inline on desktop */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 md:flex md:flex-wrap md:flex-1">
+            <select
+              value={categoriaId}
+              onChange={(e) => { setCategoriaId(e.target.value); setPage(1); }}
+              className="input-field text-xs md:text-sm md:w-48 py-2 md:py-2.5"
+            >
+              <option value="">Categorías</option>
+              {categorias.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+              ))}
+            </select>
+            <select
+              value={status}
+              onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+              className="input-field text-xs md:text-sm md:w-40 py-2 md:py-2.5"
+            >
+              <option value="">Status</option>
+              <option value="DISPONIBLE">Disponible</option>
+              <option value="AGOTADO">Agotado</option>
+            </select>
+          </div>
+
+          {/* Button */}
           {canEdit && (
-            <button onClick={() => setNuevoModal(true)} className="btn-primary flex items-center gap-2">
+            <button onClick={() => setNuevoModal(true)} className="btn-primary flex items-center justify-center gap-2 w-full md:w-auto text-sm md:text-base py-2 md:py-2.5">
               <Plus className="w-4 h-4" />
-              Nuevo Recurso
+              <span>Nuevo</span>
             </button>
           )}
         </div>

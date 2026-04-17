@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Pencil, LogOut, ChevronDown, Shield } from 'lucide-react';
+import { User, Pencil, LogOut, ChevronDown, Shield, Menu } from 'lucide-react';
 import ProfileModal from '@/components/ProfileModal';
 
 const pageTitles: Record<string, { title: string; description: string }> = {
@@ -29,7 +29,7 @@ const rolLabels: Record<string, string> = {
   SUPERVISOR: 'Supervisor',
 };
 
-export default function Header() {
+export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const page = pageTitles[pathname] || { title: 'KardexChio', description: '' };
@@ -62,59 +62,69 @@ export default function Header() {
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-6 sticky top-0 z-30">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">{page.title}</h2>
-          {page.description && (
-            <p className="text-xs text-gray-400 -mt-0.5">{page.description}</p>
-          )}
+      <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 shadow-sm">
+        <div className="flex items-center gap-4">
+          {/* Hamburger Menu */}
+          <button
+            onClick={onMenuClick}
+            className="btn-icon lg:hidden"
+          >
+            <Menu className="w-5 h-5 text-slate-600" />
+          </button>
+
+          {/* Page Title */}
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">{page.title}</h2>
+            {page.description && (
+              <p className="text-xs text-slate-500 -mt-0.5">{page.description}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 hidden md:block">
+          <span className="text-sm text-slate-500 hidden md:block">
             {new Date().toLocaleDateString('es-PE', {
-              weekday: 'long',
+              weekday: 'short',
               day: 'numeric',
-              month: 'long',
-              year: 'numeric',
+              month: 'short',
             })}
           </span>
-          <div className="w-px h-6 bg-gray-200 hidden md:block" />
+          <div className="w-px h-6 bg-slate-200 hidden md:block" />
 
           {/* User Menu */}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg transition-all duration-200 hover:bg-gray-100 ${
-                menuOpen ? 'bg-gray-100' : ''
+              className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg transition-all duration-200 hover:bg-slate-100 ${
+                menuOpen ? 'bg-slate-100' : ''
               }`}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm">
+              <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-teal-700 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm">
                 {initials}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-700 leading-tight">{fullName}</p>
-                <p className="text-[11px] text-gray-400 leading-tight">{rolLabels[user?.rol || ''] || user?.rol}</p>
+                <p className="text-sm font-medium text-slate-900 leading-tight">{fullName}</p>
+                <p className="text-[11px] text-slate-500 leading-tight">{rolLabels[user?.rol || ''] || user?.rol}</p>
               </div>
-              <ChevronDown className={`w-4 h-4 text-gray-400 hidden sm:block transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 text-slate-400 hidden sm:block transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-gray-200 shadow-xl shadow-gray-200/50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-900/10 overflow-hidden animate-scale-in z-50">
                 {/* User Info Header */}
-                <div className="px-4 py-4 bg-gray-50/80 border-b border-gray-100">
+                <div className="px-4 py-4 bg-slate-50/50 border-b border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-sm">
+                    <div className="w-11 h-11 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-md">
                       {initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{fullName}</p>
+                      <p className="text-sm font-semibold text-slate-900 truncate">{fullName}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <Shield className="w-3 h-3 text-primary-500" />
-                        <span className="text-xs text-gray-500">{rolLabels[user?.rol || ''] || user?.rol}</span>
+                        <Shield className="w-3 h-3 text-teal-600" />
+                        <span className="text-xs text-slate-600">{rolLabels[user?.rol || ''] || user?.rol}</span>
                       </div>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
+                      <p className="text-[11px] text-slate-500 mt-0.5">
                         {user?.tipo_documento}: {user?.documento}
                       </p>
                     </div>
@@ -129,9 +139,9 @@ export default function Header() {
                       setProfileMode('view');
                       setProfileOpen(true);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors"
                   >
-                    <User className="w-4 h-4 text-gray-400" />
+                    <User className="w-4 h-4 text-slate-400" />
                     <span>Ver perfil</span>
                   </button>
                   <button
@@ -140,15 +150,15 @@ export default function Header() {
                       setProfileMode('edit');
                       setProfileOpen(true);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors"
                   >
-                    <Pencil className="w-4 h-4 text-gray-400" />
+                    <Pencil className="w-4 h-4 text-slate-400" />
                     <span>Editar información</span>
                   </button>
                 </div>
 
                 {/* Divider + Logout */}
-                <div className="border-t border-gray-100 p-1.5">
+                <div className="border-t border-slate-100 p-1.5">
                   <button
                     onClick={() => {
                       setMenuOpen(false);

@@ -75,11 +75,11 @@ export default function MovimientosPage() {
 
   const columns = [
     {
-      header: 'Fecha', key: 'fecha', className: 'w-28',
+      header: 'Fecha', key: 'fecha',
       render: (item: Movimiento) => new Date(item.fecha).toLocaleDateString('es-PE'),
     },
     {
-      header: 'Tipo', key: 'tipo', className: 'w-36',
+      header: 'Tipo', key: 'tipo',
       render: (item: Movimiento) => {
         const badge = tipoBadgeStyles[item.tipo];
         if (!badge) return item.tipo;
@@ -92,7 +92,7 @@ export default function MovimientosPage() {
       },
     },
     {
-      header: 'Recurso / Equipo', key: 'recurso',
+      header: 'Recurso / Equipo', key: 'recurso', maxWidth: '250px',
       render: (item: Movimiento) => {
         if (item.recurso) return `${item.recurso.nombre} (${item.recurso.codigo})`;
         if (item.equipo) return item.equipo.nombre;
@@ -100,16 +100,16 @@ export default function MovimientosPage() {
       },
     },
     {
-      header: 'Cantidad', key: 'cantidad', className: 'w-24 text-center',
+      header: 'Cantidad', key: 'cantidad', className: 'text-center',
       render: (item: Movimiento) => (
         <span className={`font-medium ${item.tipo === 'ENTRADA' ? 'text-emerald-600' : item.tipo === 'SALIDA' ? 'text-amber-600' : 'text-blue-600'}`}>
           {item.tipo === 'ENTRADA' ? '+' : '-'}{item.cantidad}
         </span>
       ),
     },
-    { header: 'Descripción', key: 'descripcion' },
+    { header: 'Descripción', key: 'descripcion', hideOnMobile: true },
     {
-      header: 'Registrado por', key: 'creator', className: 'w-36',
+      header: 'Registrado por', key: 'creator', hideOnMobile: true,
       render: (item: Movimiento) => item.creator ? item.creator.nombre : '-',
     },
   ];

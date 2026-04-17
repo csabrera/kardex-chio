@@ -186,12 +186,12 @@ export default function UsuariosPage() {
   };
 
   const columns = [
-    { header: 'Tipo Doc', key: 'tipo_documento', className: 'w-32',
+    { header: 'Tipo Doc', key: 'tipo_documento', className: 'w-32', hideOnMobile: true,
       render: (item: Usuario) => docTypeLabel(item.tipo_documento),
     },
     { header: 'Documento', key: 'documento', className: 'w-28' },
     {
-      header: 'Nombre Completo', key: 'nombre',
+      header: 'Nombre Completo', key: 'nombre', maxWidth: '250px',
       render: (item: Usuario) => item.nombre
         ? `${item.nombre} ${item.apellido_paterno || ''} ${item.apellido_materno || ''}`.trim()
         : <span className="text-gray-400 italic">Pendiente</span>,
@@ -209,7 +209,7 @@ export default function UsuariosPage() {
       ),
     },
     {
-      header: 'Primer Inicio', key: 'primer_inicio', className: 'w-28',
+      header: 'Primer Inicio', key: 'primer_inicio', className: 'w-28', hideOnMobile: true,
       render: (item: Usuario) => (
         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${item.primer_inicio ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}`}>
           {item.primer_inicio ? 'Sí' : 'No'}
@@ -217,21 +217,24 @@ export default function UsuariosPage() {
       ),
     },
     {
-      header: 'Fecha Registro', key: 'created_at', className: 'w-32',
+      header: 'Fecha Registro', key: 'created_at', className: 'w-32', hideOnMobile: true,
       render: (item: Usuario) => new Date(item.created_at).toLocaleDateString('es-PE'),
     },
     {
-      header: 'Acciones', key: 'actions', className: 'w-32',
+      header: 'Acciones', key: 'actions', className: 'w-32 flex-shrink-0 text-center',
       render: (item: Usuario) => (
-        <div className="flex items-center gap-1">
-          <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Editar">
-            <Pencil className="w-4 h-4" />
+        <div className="flex items-center justify-center gap-1 flex-wrap">
+          <button onClick={() => openEdit(item)} className="p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Editar">
+            <Pencil className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Editar</span>
           </button>
-          <button onClick={() => handleResetPassword(item)} className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Resetear Contraseña">
-            <RotateCcw className="w-4 h-4" />
+          <button onClick={() => handleResetPassword(item)} className="p-1.5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Resetear Contraseña">
+            <RotateCcw className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Reset</span>
           </button>
-          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-            <Trash2 className="w-4 h-4" />
+          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Eliminar">
+            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Eliminar</span>
           </button>
         </div>
       ),

@@ -71,25 +71,35 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Panel izquierdo — Imagen */}
-      <div className="hidden lg:flex lg:w-[65%] relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[65%] relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-teal-900">
         <Image
           src="/warehouse-bg.jpg"
           alt="Almacén"
           fill
-          className="object-cover"
+          className="object-cover opacity-40"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-950/80 via-primary-900/60 to-primary-800/40" />
+        {/* Patrón geométrico sutil */}
+        <svg className="absolute inset-0 opacity-5" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+        </svg>
+
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-900/50 to-teal-900/40" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold tracking-tight">KardexChio</span>
+              <span className="text-3xl font-bold tracking-tight">KardexChio</span>
             </div>
           </div>
 
@@ -121,32 +131,32 @@ export default function LoginPage() {
       </div>
 
       {/* Panel derecho — Formulario */}
-      <div className="w-full lg:w-[35%] flex flex-col items-center justify-center bg-gray-50 px-6 sm:px-12">
+      <div className="w-full lg:w-[35%] flex flex-col items-center justify-center bg-slate-50 px-6 sm:px-12">
         <div className="w-full max-w-sm">
           {/* Logo móvil */}
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-600 rounded-xl mb-3">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl mb-4">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-gray-900">KardexChio</h1>
+            <h1 className="text-2xl font-bold text-slate-900">KardexChio</h1>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h2>
-            <p className="text-gray-500 mt-1">Ingresa tus credenciales para continuar</p>
+            <h2 className="text-3xl font-bold text-slate-900">Iniciar Sesión</h2>
+            <p className="text-slate-600 mt-2">Ingresa tus credenciales para continuar</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Tipo de Documento
               </label>
               <select
                 value={tipoDocumento}
                 onChange={(e) => { setTipoDocumento(e.target.value); setDocumento(''); }}
-                className="input-field bg-white"
+                className="input-field"
               >
                 {DOCUMENT_TYPES.map(dt => (
                   <option key={dt.value} value={dt.value}>{dt.label}</option>
@@ -155,12 +165,12 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 N° de Documento
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
                   </svg>
                 </div>
@@ -168,7 +178,7 @@ export default function LoginPage() {
                   type="text"
                   value={documento}
                   onChange={(e) => handleDocumentoChange(e.target.value)}
-                  className="input-field bg-white pl-10"
+                  className="input-field pl-10"
                   placeholder={docType.placeholder}
                   required
                   maxLength={docType.maxLength}
@@ -177,12 +187,12 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                   </svg>
                 </div>
@@ -190,14 +200,14 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field bg-white pl-10 pr-10"
+                  className="input-field pl-10 pr-10"
                   placeholder="Ingrese su contraseña"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +226,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-md hover:shadow-lg"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -230,7 +240,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 mt-8">
+          <p className="text-center text-xs text-slate-500 mt-8">
             KardexChio v1.0 — Sistema de Control de Almacén
           </p>
         </div>

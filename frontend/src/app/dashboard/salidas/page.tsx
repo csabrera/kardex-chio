@@ -224,53 +224,53 @@ export default function SalidasPage() {
 
   const columns = [
     {
-      header: 'Fecha', key: 'fecha', className: 'w-36',
+      header: 'Fecha', key: 'fecha',
       render: (item: Salida) => new Date(item.fecha).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }),
     },
     {
-      header: 'N° Registro', key: 'num_registro', className: 'w-28',
+      header: 'N° Registro', key: 'num_registro',
       render: (item: Salida) => item.num_registro || '-',
     },
     {
-      header: 'Código', key: 'codigo', className: 'w-24',
+      header: 'Código', key: 'codigo',
       render: (item: Salida) => item.recurso.codigo,
     },
     {
-      header: 'Recurso', key: 'recurso_nombre',
+      header: 'Recurso', key: 'recurso_nombre', maxWidth: '250px',
       render: (item: Salida) => item.recurso.nombre,
     },
     {
-      header: 'Categoría', key: 'categoria', className: 'w-28',
+      header: 'Categoría', key: 'categoria', hideOnMobile: true,
       render: (item: Salida) => item.recurso.categoria?.nombre || '-',
     },
     {
-      header: 'Unidad', key: 'unidad', className: 'w-20',
+      header: 'Unidad', key: 'unidad',
       render: (item: Salida) => item.recurso.unidad,
     },
     {
-      header: 'Cantidad', key: 'cantidad', className: 'w-24 text-center',
+      header: 'Cantidad', key: 'cantidad', className: 'text-center',
       render: (item: Salida) => (
         <span className="text-amber-600 font-semibold">-{item.cantidad}</span>
       ),
     },
     {
-      header: 'Frente', key: 'frente_trabajo', className: 'w-32',
+      header: 'Frente', key: 'frente_trabajo', hideOnMobile: true,
       render: (item: Salida) => item.frenteTrabajo?.nombre || '-',
     },
     {
-      header: 'Descripción', key: 'descripcion_trabajo', className: 'w-36',
+      header: 'Descripción', key: 'descripcion_trabajo', hideOnMobile: true,
       render: (item: Salida) => item.descripcion_trabajo || '-',
     },
     {
-      header: 'Entrega', key: 'quien_entrega', className: 'w-32',
+      header: 'Entrega', key: 'quien_entrega', hideOnMobile: true,
       render: (item: Salida) => item.quienEntrega?.nombre || '-',
     },
     {
-      header: 'Recibe', key: 'quien_recibe', className: 'w-32',
+      header: 'Recibe', key: 'quien_recibe', hideOnMobile: true,
       render: (item: Salida) => item.quienRecibe?.nombre || '-',
     },
     ...(canDelete ? [{
-      header: 'Acciones', key: 'actions', className: 'w-20',
+      header: 'Acciones', key: 'actions', className: 'w-16 flex-shrink-0 text-center',
       render: (item: Salida) => (
         <button
           onClick={() => handleDelete(item.id)}
@@ -286,56 +286,61 @@ export default function SalidasPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 bg-amber-100 rounded-lg">
-          <ArrowUpFromLine className="w-5 h-5 text-amber-600" />
+      <div className="flex items-center gap-2 md:gap-3 mb-2">
+        <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+          <ArrowUpFromLine className="w-4 md:w-5 h-4 md:h-5 text-amber-600" />
         </div>
-        <h1 className="text-xl font-bold text-gray-800">Salidas de Almacén</h1>
+        <h1 className="text-lg md:text-xl font-bold text-slate-900">Salidas</h1>
       </div>
 
       {/* Filters */}
-      <div className="card">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-[250px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <div className="card p-3 md:p-6">
+        <div className="space-y-3 md:space-y-0 md:flex md:flex-wrap md:items-center md:gap-4">
+          {/* Search - Full width on mobile */}
+          <div className="flex-1 min-w-full md:min-w-[250px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Buscar por recurso, código o frente..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="input-field pl-10"
+              className="input-field pl-10 text-sm md:text-base"
             />
           </div>
-          <select
-            value={categoriaId}
-            onChange={(e) => { setCategoriaId(e.target.value); setPage(1); }}
-            className="input-field w-48"
-          >
-            <option value="">Todas las categorías</option>
-            {categorias.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={fechaDesde}
-            onChange={(e) => { setFechaDesde(e.target.value); setPage(1); }}
-            className="input-field w-40"
-            placeholder="Desde"
-            title="Fecha desde"
-          />
-          <input
-            type="date"
-            value={fechaHasta}
-            onChange={(e) => { setFechaHasta(e.target.value); setPage(1); }}
-            className="input-field w-40"
-            placeholder="Hasta"
-            title="Fecha hasta"
-          />
+
+          {/* Filters Grid */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 md:flex md:flex-wrap md:flex-1">
+            <select
+              value={categoriaId}
+              onChange={(e) => { setCategoriaId(e.target.value); setPage(1); }}
+              className="input-field text-xs md:text-sm md:w-48 py-2 md:py-2.5"
+            >
+              <option value="">Categorías</option>
+              {categorias.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={fechaDesde}
+              onChange={(e) => { setFechaDesde(e.target.value); setPage(1); }}
+              className="input-field text-xs md:text-sm py-2 md:py-2.5"
+              title="Fecha desde"
+            />
+            <input
+              type="date"
+              value={fechaHasta}
+              onChange={(e) => { setFechaHasta(e.target.value); setPage(1); }}
+              className="input-field text-xs md:text-sm py-2 md:py-2.5"
+              title="Fecha hasta"
+            />
+          </div>
+
+          {/* Button */}
           {canCreate && (
-            <button onClick={() => { resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center gap-2">
+            <button onClick={() => { resetForm(); setNuevoModal(true); }} className="btn-primary flex items-center justify-center gap-2 w-full md:w-auto text-sm md:text-base py-2 md:py-2.5">
               <Plus className="w-4 h-4" />
-              Nueva Salida
+              <span>Nueva</span>
             </button>
           )}
         </div>

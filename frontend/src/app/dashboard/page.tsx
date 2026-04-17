@@ -79,46 +79,50 @@ function StatCard({
   const colorMap = {
     blue: {
       bg: 'bg-blue-50',
-      icon: 'bg-blue-500',
+      icon: 'bg-blue-600',
       text: 'text-blue-600',
       ring: 'ring-blue-500/20',
+      border: 'border-l-blue-600',
     },
     emerald: {
       bg: 'bg-emerald-50',
-      icon: 'bg-emerald-500',
+      icon: 'bg-emerald-600',
       text: 'text-emerald-600',
       ring: 'ring-emerald-500/20',
+      border: 'border-l-emerald-600',
     },
     amber: {
       bg: 'bg-amber-50',
-      icon: 'bg-amber-500',
+      icon: 'bg-amber-600',
       text: 'text-amber-600',
       ring: 'ring-amber-500/20',
+      border: 'border-l-amber-600',
     },
     red: {
       bg: 'bg-red-50',
-      icon: 'bg-red-500',
+      icon: 'bg-red-600',
       text: 'text-red-600',
       ring: 'ring-red-500/20',
+      border: 'border-l-red-600',
     },
   };
   const c = colorMap[color];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-all duration-300 group">
+    <div className={`bg-white rounded-xl border border-slate-100 border-l-4 ${c.border} p-5 hover:shadow-lg transition-all duration-300 group shadow-sm`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className="text-sm font-medium text-slate-600">{title}</p>
           <div className="flex items-baseline gap-2 mt-2">
-            <p className="text-3xl font-bold text-gray-900 tracking-tight">
+            <p className="text-3xl font-bold text-slate-900 tracking-tight">
               {value.toLocaleString()}
             </p>
           </div>
           {subtitle && (
-            <p className={`text-sm mt-1 ${c.text} font-medium`}>{subtitle}</p>
+            <p className={`text-sm mt-2 ${c.text} font-medium`}>{subtitle}</p>
           )}
         </div>
-        <div className={`${c.icon} p-3 rounded-xl shadow-sm ring-4 ${c.ring} group-hover:scale-105 transition-transform`}>
+        <div className={`${c.icon} p-3 rounded-xl shadow-md ring-4 ${c.ring} group-hover:scale-110 transition-transform`}>
           <Icon className="w-5 h-5 text-white" />
         </div>
       </div>
@@ -128,10 +132,10 @@ function StatCard({
 
 function SectionHeader({ icon: Icon, title, action }: { icon: React.ElementType; title: string; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        <Icon className="w-5 h-5 text-gray-400" />
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+    <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center gap-3">
+        <Icon className="w-5 h-5 text-slate-500" />
+        <h3 className="text-base font-bold text-slate-900">{title}</h3>
       </div>
       {action}
     </div>
@@ -141,13 +145,13 @@ function SectionHeader({ icon: Icon, title, action }: { icon: React.ElementType;
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
-      <p className="font-medium text-gray-700 mb-1">{label}</p>
+    <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-3 text-sm">
+      <p className="font-semibold text-slate-900 mb-1">{label}</p>
       {payload.map((item: any) => (
         <div key={item.dataKey} className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-          <span className="text-gray-500">{item.name}:</span>
-          <span className="font-semibold text-gray-800">{item.value.toLocaleString()}</span>
+          <span className="text-slate-600">{item.name}:</span>
+          <span className="font-semibold text-slate-800">{item.value.toLocaleString()}</span>
         </div>
       ))}
     </div>
@@ -169,8 +173,8 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-[3px] border-primary-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Cargando datos...</p>
+          <div className="w-10 h-10 border-[3px] border-teal-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-500">Cargando datos...</p>
         </div>
       </div>
     );
@@ -180,8 +184,8 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Error al cargar el dashboard</p>
+          <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <p className="text-slate-600">Error al cargar el dashboard</p>
         </div>
       </div>
     );
@@ -240,20 +244,20 @@ export default function DashboardPage() {
       {/* Chart + Categories Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Chart */}
-        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-100 p-6">
+        <div className="xl:col-span-2 bg-white rounded-xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader icon={BarChart3} title="Entradas vs Salidas por Mes" />
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis
                   dataKey="mes"
-                  tick={{ fontSize: 12, fill: '#94a3b8' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                  axisLine={{ stroke: '#cbd5e1' }}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 12, fill: '#94a3b8' }}
+                  tick={{ fontSize: 12, fill: '#64748b' }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -263,14 +267,14 @@ export default function DashboardPage() {
                   iconType="circle"
                   iconSize={8}
                 />
-                <Bar dataKey="entradas" fill="#10b981" name="Entradas" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="entradas" fill="#14b8a6" name="Entradas" radius={[6, 6, 0, 0]} maxBarSize={40} />
                 <Bar dataKey="salidas" fill="#f59e0b" name="Salidas" radius={[6, 6, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[320px] text-gray-400">
+            <div className="flex items-center justify-center h-[320px] text-slate-400">
               <div className="text-center">
-                <BarChart3 className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                <BarChart3 className="w-10 h-10 mx-auto mb-2 text-slate-300" />
                 <p>Sin datos para mostrar</p>
               </div>
             </div>
@@ -278,20 +282,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Categories */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="bg-white rounded-xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader icon={Boxes} title="Por Categoría" />
           <div className="space-y-3">
             {categorias.map((cat) => {
               const percentage = (parseInt(cat.total) / maxCatTotal) * 100;
               return (
                 <div key={cat.nombre}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-600 truncate pr-2">{cat.nombre}</span>
-                    <span className="text-sm font-bold text-gray-900">{cat.total}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-slate-700 truncate pr-2 font-medium">{cat.nombre}</span>
+                    <span className="text-sm font-bold text-slate-900">{cat.total}</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full transition-all duration-500"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -305,13 +309,13 @@ export default function DashboardPage() {
       {/* Alerts + Recent Movements Row */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Alerts */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="bg-white rounded-xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader
             icon={AlertTriangle}
             title="Alertas de Stock"
             action={
               alertas.length > 0 ? (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 ring-1 ring-red-500/20">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
                   {alertas.length} agotados
                 </span>
               ) : null
@@ -319,28 +323,28 @@ export default function DashboardPage() {
           />
           <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
             {alertas.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                 <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
-                  <Package className="w-6 h-6 text-emerald-400" />
+                  <Package className="w-6 h-6 text-emerald-500" />
                 </div>
-                <p className="font-medium text-gray-500">Todo en orden</p>
-                <p className="text-sm">No hay recursos agotados</p>
+                <p className="font-medium text-slate-600">Todo en orden</p>
+                <p className="text-sm text-slate-500">No hay recursos agotados</p>
               </div>
             ) : (
               alertas.map((alerta) => (
                 <div
                   key={alerta.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-red-50/60 border border-red-100 hover:bg-red-50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-red-50/50 border border-red-200/50 hover:bg-red-50 transition-colors"
                 >
                   <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0 animate-pulse" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{alerta.nombre}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-slate-800 truncate">{alerta.nombre}</p>
+                    <p className="text-xs text-slate-600">
                       {alerta.codigo} &middot; {alerta.categoria}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700">
                       {alerta.existencia_actual} uds.
                     </span>
                   </div>
@@ -351,16 +355,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Movements */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="bg-white rounded-xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader icon={Clock} title="Movimientos Recientes" />
           <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
             {movimientos_recientes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                  <Clock className="w-6 h-6 text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                  <Clock className="w-6 h-6 text-slate-500" />
                 </div>
-                <p className="font-medium text-gray-500">Sin movimientos</p>
-                <p className="text-sm">Aún no se registran operaciones</p>
+                <p className="font-medium text-slate-600">Sin movimientos</p>
+                <p className="text-sm text-slate-500">Aún no se registran operaciones</p>
               </div>
             ) : (
               movimientos_recientes.map((mov) => {
@@ -368,12 +372,12 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={mov.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors group"
                   >
                     <div className={`p-2 rounded-lg flex-shrink-0 ${
                       isEntry
-                        ? 'bg-emerald-50 ring-1 ring-emerald-500/10'
-                        : 'bg-amber-50 ring-1 ring-amber-500/10'
+                        ? 'bg-emerald-50 ring-1 ring-emerald-500/20'
+                        : 'bg-amber-50 ring-1 ring-amber-500/20'
                     }`}>
                       {isEntry ? (
                         <ArrowDownRight className="w-4 h-4 text-emerald-600" />
@@ -382,10 +386,10 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">
+                      <p className="text-sm font-medium text-slate-800 truncate">
                         {mov.recurso_nombre || mov.equipo_nombre}
                       </p>
-                      <p className="text-xs text-gray-400 truncate">{mov.descripcion}</p>
+                      <p className="text-xs text-slate-500 truncate">{mov.descripcion}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className={`text-sm font-bold ${
@@ -393,7 +397,7 @@ export default function DashboardPage() {
                       }`}>
                         {isEntry ? '+' : '-'}{mov.cantidad}
                       </p>
-                      <p className="text-[11px] text-gray-400">
+                      <p className="text-[11px] text-slate-500">
                         {new Date(mov.fecha).toLocaleString('es-PE', {
                           day: '2-digit',
                           month: '2-digit',

@@ -3,44 +3,104 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --sidebar-width: 260px;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-gray-50/50 text-gray-900 antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    @apply bg-slate-100;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-slate-300 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-slate-400;
   }
 }
 
 @layer components {
+  /* Buttons */
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98];
+    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 active:scale-[0.98] shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-all duration-200 active:scale-[0.98];
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition-all duration-200 active:scale-[0.98];
   }
 
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-[0.98];
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-[0.98] shadow-sm;
   }
 
+  .btn-icon {
+    @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-200 hover:bg-slate-100;
+  }
+
+  /* Input Fields */
   .input-field {
-    @apply w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 placeholder:text-gray-400;
+    @apply w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-200 placeholder:text-slate-400 bg-white;
   }
 
+  /* Cards and Sections */
   .card {
-    @apply bg-white rounded-xl border border-gray-100 p-6;
+    @apply bg-white rounded-xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+
+  .section-card {
+    @apply bg-white rounded-xl border border-slate-100 overflow-hidden;
+  }
+
+  .page-container {
+    @apply space-y-6;
+  }
+
+  .table-container {
+    @apply bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm;
+  }
+
+  /* Status and Badges */
+  .badge-base {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold;
+  }
+
+  /* Loading and Animations */
+  @keyframes spin-smooth {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-smooth {
+    animation: spin-smooth 1s linear infinite;
+  }
+
+  /* Skeleton Loading */
+  .skeleton {
+    @apply animate-pulse bg-slate-200 rounded;
+  }
+
+  /* Responsive spacing */
+  @media (max-width: 1024px) {
+    :root {
+      --sidebar-width: 0px;
+    }
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-teal-500;
   }
 }

@@ -131,31 +131,33 @@ export default function EquiposTab() {
   };
 
   const columns = [
-    { header: 'Nombre', key: 'nombre' },
+    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
     {
-      header: 'Categoría', key: 'categoria', className: 'w-28',
+      header: 'Categoría', key: 'categoria', hideOnMobile: true,
       render: (item: Equipo) => item.categoria?.nombre || '-',
     },
     {
-      header: 'Unidad', key: 'unidadMedida', className: 'w-20',
+      header: 'Unidad', key: 'unidadMedida', hideOnMobile: true,
       render: (item: Equipo) => item.unidadMedida?.nombre || '-',
     },
     {
-      header: 'Estado', key: 'estado', className: 'w-32',
+      header: 'Estado', key: 'estado',
       render: (item: Equipo) => <StatusBadge status={item.estado} />,
     },
     {
-      header: 'Acciones', key: 'actions', className: 'w-24',
+      header: 'Acciones', key: 'actions', className: 'w-24 flex-shrink-0 text-center',
       render: (item: Equipo) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1">
           {canEdit && (
-            <button onClick={() => openEdit(item)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Editar">
-              <Pencil className="w-4 h-4" />
+            <button onClick={() => openEdit(item)} className="p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Editar">
+              <Pencil className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline text-sm font-medium">Editar</span>
             </button>
           )}
           {canDelete && (
-            <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-              <Trash2 className="w-4 h-4" />
+            <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Eliminar">
+              <Trash2 className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline text-sm font-medium">Eliminar</span>
             </button>
           )}
         </div>

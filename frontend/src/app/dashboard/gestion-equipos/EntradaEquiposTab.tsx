@@ -201,28 +201,29 @@ export default function EntradaEquiposTab({ personas, frentesTrabajo }: EntradaE
     },
     { header: 'N° Registro', key: 'num_registro', className: 'w-28' },
     {
-      header: 'Equipo', key: 'equipo',
+      header: 'Equipo', key: 'equipo', maxWidth: '250px',
       render: (item: EntradaEquipo) => item.equipo?.nombre || '-',
     },
     { header: 'Cantidad', key: 'cantidad', className: 'w-24 text-center' },
     {
-      header: 'Frente de Trabajo', key: 'frenteTrabajo',
+      header: 'Frente de Trabajo', key: 'frenteTrabajo', hideOnMobile: true,
       render: (item: EntradaEquipo) => item.frenteTrabajo?.nombre || '-',
     },
-    { header: 'Descripción', key: 'descripcion_trabajo' },
+    { header: 'Descripción', key: 'descripcion_trabajo', hideOnMobile: true },
     {
-      header: 'Quién Entrega', key: 'quienEntrega', className: 'w-32',
+      header: 'Quién Entrega', key: 'quienEntrega', hideOnMobile: true,
       render: (item: EntradaEquipo) => item.quienEntrega?.nombre || '-',
     },
     {
-      header: 'Quién Recibe', key: 'quienRecibe', className: 'w-32',
+      header: 'Quién Recibe', key: 'quienRecibe', hideOnMobile: true,
       render: (item: EntradaEquipo) => item.quienRecibe?.nombre || '-',
     },
     {
-      header: 'Acciones', key: 'actions', className: 'w-20',
+      header: 'Acciones', key: 'actions', className: 'w-24 flex-shrink-0 text-center',
       render: (item: EntradaEquipo) => canDelete ? (
-        <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-          <Trash2 className="w-4 h-4" />
+        <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5" title="Eliminar">
+          <Trash2 className="w-4 h-4 flex-shrink-0" />
+          <span className="hidden sm:inline text-sm font-medium">Eliminar</span>
         </button>
       ) : null,
     },

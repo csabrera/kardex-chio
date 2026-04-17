@@ -42,19 +42,19 @@ export default function RecursosPage() {
   return (
     <div className="space-y-4">
       {/* Tab bar */}
-      <div className="card p-1 flex gap-1 flex-wrap">
+      <div className="card p-2 flex gap-1 md:gap-2">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base transition-all flex-1 md:flex-none justify-center md:justify-start ${
               activeTab === tab.id
-                ? 'bg-primary-600 text-white shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            <tab.icon className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">{tab.label}</span>
           </button>
         ))}
       </div>
