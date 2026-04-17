@@ -24,8 +24,13 @@ export class EquiposController {
   constructor(private equiposService: EquiposService) {}
 
   @Get()
-  findAll(@Query('search') search?: string, @Query('estado') estado?: string) {
-    return this.equiposService.findAll({ search, estado });
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('estado') estado?: string,
+  ) {
+    return this.equiposService.findAll({ page, limit, search, estado });
   }
 
   @Get(':id')

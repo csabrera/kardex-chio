@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import DataTable from '@/components/DataTable';
+import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
@@ -31,6 +32,9 @@ export default function EquiposTab() {
   const { user } = useAuth();
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -52,17 +56,19 @@ export default function EquiposTab() {
   const fetchEquipos = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page, limit: 20 };
       if (search) params.search = search;
       if (estadoFilter) params.estado = estadoFilter;
       const res = await api.get('/equipos', { params });
-      setEquipos(res.data);
+      setEquipos(res.data.data);
+      setTotalPages(res.data.totalPages);
+      setTotal(res.data.total);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [search, estadoFilter]);
+  }, [page, search, estadoFilter]);
 
   useEffect(() => {
     const timer = setTimeout(fetchEquipos, 300);
@@ -167,13 +173,13 @@ export default function EquiposTab() {
               type="text"
               placeholder="Buscar equipo..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="input-field pl-10"
             />
           </div>
           <select
             value={estadoFilter}
-            onChange={(e) => setEstadoFilter(e.target.value)}
+            onChange={(e) => { setEstadoFilter(e.target.value); setPage(1); }}
             className="input-field w-44"
           >
             <option value="">Todos los estados</option>
@@ -189,7 +195,8 @@ export default function EquiposTab() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={equipos} loading={loading} />
+      <DataTable columns={columns} data={equipos} loading={loading} rowNumberOffset={(page - 1) * 20} />
+      <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
 
       <Modal isOpen={modal} onClose={() => setModal(false)} title={editing ? 'Editar Equipo' : 'Nuevo Equipo'}>
         <form onSubmit={handleSubmit} className="space-y-4">

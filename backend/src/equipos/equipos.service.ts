@@ -12,7 +12,11 @@ export class EquiposService {
     private equiposRepo: Repository<Equipo>,
   ) {}
 
-  async findAll(query: { search?: string; estado?: string }) {
+  async findAll(query: { page?: number; limit?: number; search?: string; estado?: string }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const offset = (page - 1) * limit;
+
     const qb = this.equiposRepo
       .createQueryBuilder('e')
       .leftJoinAndSelect('e.categoria', 'c')
@@ -29,7 +33,17 @@ export class EquiposService {
     }
 
     qb.orderBy('e.nombre', 'ASC');
-    return qb.getMany();
+
+    const total = await qb.getCount();
+    const data = await qb.skip(offset).take(limit).getMany();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number) {
