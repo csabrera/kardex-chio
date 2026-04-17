@@ -26,8 +26,9 @@ async function bootstrap() {
   );
 
   const port = parseInt(process.env.PORT || '3001', 10);
-  console.log(`Starting server on port ${port}...`);
-  await app.listen(port);
-  console.log(`✓ KardexChio Backend listening on port ${port}`);
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  console.log(`Starting server on ${host}:${port}...`);
+  await app.listen(port, host);
+  console.log(`✓ KardexChio Backend listening on ${host}:${port}`);
 }
 bootstrap();
