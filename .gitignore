@@ -1,8 +1,26 @@
 node_modules/
 .next/
 dist/
+
+# Environment variables (pero permitir .env.example y .env.local.example)
 .env
+.env.local
+.env.*.local
+!.env.example
+!.env.local.example
+!backend/.env.example
+!frontend/.env.local.example
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Data
 postgres_data/
 *.xlsx
