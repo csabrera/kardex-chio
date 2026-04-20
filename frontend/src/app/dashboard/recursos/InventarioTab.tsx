@@ -9,6 +9,28 @@ import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
 import { Search, Plus, History, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/swal';
+import Select from 'react-select';
+
+const selectStyles = {
+  control: (base: Record<string, unknown>, state: { isFocused: boolean }) => ({
+    ...base,
+    minHeight: '38px',
+    borderColor: state.isFocused ? '#6366f1' : '#d1d5db',
+    boxShadow: state.isFocused ? '0 0 0 1px #6366f1' : 'none',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    '&:hover': { borderColor: '#6366f1' },
+  }),
+  option: (base: Record<string, unknown>, state: { isSelected: boolean; isFocused: boolean }) => ({
+    ...base,
+    fontSize: '0.875rem',
+    backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? '#eef2ff' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+  }),
+  placeholder: (base: Record<string, unknown>) => ({ ...base, color: '#9ca3af', fontSize: '0.875rem' }),
+  singleValue: (base: Record<string, unknown>) => ({ ...base, fontSize: '0.875rem', color: '#111827' }),
+  menu: (base: Record<string, unknown>) => ({ ...base, zIndex: 9999, borderRadius: '0.5rem', fontSize: '0.875rem' }),
+};
 
 interface Recurso {
   id: number;
@@ -338,31 +360,29 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoría <span className="text-red-500">*</span></label>
-              <select
-                value={form.categoria_id}
-                onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
-                className="input-field"
-                required
-              >
-                <option value="">Seleccionar...</option>
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={categorias.map((cat) => ({ value: String(cat.id), label: cat.nombre }))}
+                value={form.categoria_id ? { value: form.categoria_id, label: categorias.find((c) => String(c.id) === form.categoria_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, categoria_id: opt?.value || '' })}
+                placeholder="Buscar categoría..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida <span className="text-red-500">*</span></label>
-              <select
-                value={form.unidad_medida_id}
-                onChange={(e) => setForm({ ...form, unidad_medida_id: e.target.value })}
-                className="input-field"
-                required
-              >
-                <option value="">Seleccionar...</option>
-                {unidades.map((u) => (
-                  <option key={u.id} value={u.id}>{u.nombre} ({u.codigo})</option>
-                ))}
-              </select>
+              <Select
+                options={unidades.map((u) => ({ value: String(u.id), label: `${u.nombre} (${u.codigo})` }))}
+                value={form.unidad_medida_id ? (() => { const u = unidades.find((u) => String(u.id) === form.unidad_medida_id); return u ? { value: form.unidad_medida_id, label: `${u.nombre} (${u.codigo})` } : null; })() : null}
+                onChange={(opt) => setForm({ ...form, unidad_medida_id: opt?.value || '' })}
+                placeholder="Buscar unidad..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
           </div>
           <div>

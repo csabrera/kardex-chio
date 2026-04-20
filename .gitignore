@@ -24,3 +24,5 @@ Thumbs.db
 # Data
 postgres_data/
 *.xlsx
+
+.claude/

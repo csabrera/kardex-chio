@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Equipo } from '../equipos/equipo.entity.js';
+import { SalidaEquipo } from '../salida-equipos/salida-equipo.entity.js';
 import { Usuario } from '../usuarios/usuario.entity.js';
 import { FrenteTrabajo } from '../frentes-trabajo/frente-trabajo.entity.js';
 import { Persona } from '../personas/persona.entity.js';
@@ -19,8 +20,15 @@ export class EntradaEquipo {
   @Column({ type: 'timestamp' })
   fecha: Date;
 
-  @Column({ length: 50, nullable: true })
-  num_registro: string;
+  @Column({ type: 'character varying', length: 20, default: 'ADQUISICION' })
+  tipo_entrada: string;
+
+  @Column({ nullable: true })
+  salida_equipo_id: number;
+
+  @ManyToOne(() => SalidaEquipo, { nullable: true })
+  @JoinColumn({ name: 'salida_equipo_id' })
+  salidaOrigen: SalidaEquipo;
 
   @Column()
   equipo_id: number;

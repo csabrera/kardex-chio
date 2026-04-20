@@ -1,38 +1,37 @@
 import {
   IsString,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsDateString,
 } from 'class-validator';
 
 export class CreateSalidaDto {
-  @IsDateString()
+  @IsDateString({}, { message: 'La fecha debe ser una fecha válida' })
   fecha: string;
 
-  @IsString()
+  @IsString({ message: 'El número de registro debe ser texto' })
   @IsOptional()
   num_registro?: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'El recurso es requerido' })
   recurso_id: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'La cantidad debe ser un número' })
   cantidad: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'El frente de trabajo no es válido' })
   @IsOptional()
   frente_trabajo_id?: number;
 
-  @IsString()
+  @IsString({ message: 'La descripción debe ser texto' })
   @IsOptional()
   descripcion_trabajo?: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Quién entrega no es válido' })
   @IsOptional()
   quien_entrega_id?: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Quién recibe no es válido' })
   @IsOptional()
   quien_recibe_id?: number;
 }

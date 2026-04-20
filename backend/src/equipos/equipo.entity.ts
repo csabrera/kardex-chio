@@ -12,8 +12,18 @@ import { UnidadMedida } from '../unidades-medida/unidad-medida.entity.js';
 
 export enum EquipoEstado {
   EN_ALMACEN = 'EN_ALMACEN',
-  SALIDA = 'SALIDA',
-  INGRESO = 'INGRESO',
+  AGOTADO = 'AGOTADO',
+  INACTIVO = 'INACTIVO',
+}
+
+export enum TipoSalidaEquipo {
+  PRESTAMO = 'PRESTAMO',
+  ASIGNACION = 'ASIGNACION',
+}
+
+export enum TipoEntradaEquipo {
+  ADQUISICION = 'ADQUISICION',
+  RETORNO = 'RETORNO',
 }
 
 @Entity('equipos')
@@ -41,12 +51,9 @@ export class Equipo {
   @JoinColumn({ name: 'unidad_medida_id' })
   unidadMedida: UnidadMedida;
 
-  @Column({
-    type: 'enum',
-    enum: EquipoEstado,
-    default: EquipoEstado.EN_ALMACEN,
-  })
-  estado: EquipoEstado;
+  // estado se calcula desde la vista vista_stock_equipos, no se guarda manualmente
+  @Column({ type: 'character varying', length: 20, default: 'EN_ALMACEN' })
+  estado: string;
 
   @Column({ default: true })
   activo: boolean;

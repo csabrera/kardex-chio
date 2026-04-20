@@ -29,6 +29,8 @@ export class SalidaEquiposController {
     @Query('search') search?: string,
     @Query('fecha_desde') fecha_desde?: string,
     @Query('fecha_hasta') fecha_hasta?: string,
+    @Query('tipo_salida') tipo_salida?: string,
+    @Query('cerrada') cerrada?: string,
   ) {
     return this.salidaEquiposService.findAll({
       page,
@@ -36,7 +38,14 @@ export class SalidaEquiposController {
       search,
       fecha_desde,
       fecha_hasta,
+      tipo_salida,
+      cerrada,
     });
+  }
+
+  @Get('abiertas/:equipo_id')
+  findAbiertasByEquipo(@Param('equipo_id', ParseIntPipe) equipo_id: number) {
+    return this.salidaEquiposService.findAbiertasByEquipo(equipo_id);
   }
 
   @Get(':id')

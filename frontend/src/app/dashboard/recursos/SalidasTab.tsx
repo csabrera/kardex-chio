@@ -8,6 +8,7 @@ import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
 import { Search, Plus, Trash2, Pencil, ArrowUpFromLine } from 'lucide-react';
 import { showSuccess, showError, confirmDelete } from '@/lib/swal';
+import Select from 'react-select';
 
 interface Recurso {
   id: number;
@@ -56,6 +57,27 @@ interface Categoria {
 
 interface SalidasTabProps { categorias: Categoria[] }
 
+const selectStyles = {
+  control: (base: Record<string, unknown>, state: { isFocused: boolean }) => ({
+    ...base,
+    minHeight: '38px',
+    borderColor: state.isFocused ? '#6366f1' : '#d1d5db',
+    boxShadow: state.isFocused ? '0 0 0 1px #6366f1' : 'none',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    '&:hover': { borderColor: '#6366f1' },
+  }),
+  option: (base: Record<string, unknown>, state: { isSelected: boolean; isFocused: boolean }) => ({
+    ...base,
+    fontSize: '0.875rem',
+    backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? '#eef2ff' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+  }),
+  placeholder: (base: Record<string, unknown>) => ({ ...base, color: '#9ca3af', fontSize: '0.875rem' }),
+  singleValue: (base: Record<string, unknown>) => ({ ...base, fontSize: '0.875rem', color: '#111827' }),
+  menu: (base: Record<string, unknown>) => ({ ...base, zIndex: 9999, borderRadius: '0.5rem', fontSize: '0.875rem' }),
+};
+
 export default function SalidasTab({ categorias }: SalidasTabProps) {
   const { user } = useAuth();
   const [data, setData] = useState<Salida[]>([]);
@@ -78,8 +100,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
 
   // Form state
   const [form, setForm] = useState({
-    fecha: new Date().toISOString().slice(0, 16),
-    num_registro: '',
+    fecha: '',
     recurso_id: '',
     cantidad: '',
     frente_trabajo_id: '',
@@ -168,8 +189,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
     setFormLoading(true);
     try {
       const payload = {
-        fecha: form.fecha,
-        num_registro: form.num_registro || undefined,
+        fecha: editing ? form.fecha : new Date().toISOString(),
         recurso_id: parseInt(form.recurso_id),
         cantidad: parseInt(form.cantidad),
         frente_trabajo_id: form.frente_trabajo_id ? parseInt(form.frente_trabajo_id) : undefined,
@@ -199,8 +219,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
   const openEdit = (item: Salida) => {
     setEditing(item);
     setForm({
-      fecha: new Date(item.fecha).toISOString().slice(0, 16),
-      num_registro: item.num_registro || '',
+      fecha: item.fecha,
       recurso_id: String(item.recurso.id),
       cantidad: String(item.cantidad),
       frente_trabajo_id: String(item.frenteTrabajo?.id || ''),
@@ -228,8 +247,7 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
 
   const resetForm = () => {
     setForm({
-      fecha: new Date().toISOString().slice(0, 16),
-      num_registro: '',
+      fecha: '',
       recurso_id: '',
       cantidad: '',
       frente_trabajo_id: '',
@@ -251,15 +269,11 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
 
   const columns = [
     {
-      header: 'Fecha', key: 'fecha', className: 'w-36',
+      header: 'Fecha', key: 'fecha', className: 'whitespace-nowrap',
       render: (item: Salida) => new Date(item.fecha).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }),
     },
     {
-      header: 'N° Registro', key: 'num_registro', className: 'w-28',
-      render: (item: Salida) => item.num_registro || '-',
-    },
-    {
-      header: 'Código', key: 'codigo', className: 'w-24',
+      header: 'Código', key: 'codigo', className: 'whitespace-nowrap',
       render: (item: Salida) => item.recurso.codigo,
     },
     {
@@ -267,37 +281,37 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
       render: (item: Salida) => item.recurso.nombre,
     },
     {
-      header: 'Categoría', key: 'categoria', className: 'w-28',
+      header: 'Categoría', key: 'categoria', className: 'whitespace-nowrap',
       render: (item: Salida) => item.recurso.categoria?.nombre || '-',
     },
     {
-      header: 'Unidad', key: 'unidad', className: 'w-20',
+      header: 'Unidad', key: 'unidad', className: 'whitespace-nowrap',
       render: (item: Salida) => item.recurso.unidad,
     },
     {
-      header: 'Cantidad', key: 'cantidad', className: 'w-24 text-center',
+      header: 'Cantidad', key: 'cantidad', className: 'whitespace-nowrap text-center',
       render: (item: Salida) => (
         <span className="text-amber-600 font-semibold">-{item.cantidad}</span>
       ),
     },
     {
-      header: 'Frente', key: 'frente_trabajo', className: 'w-32',
+      header: 'Frente', key: 'frente_trabajo', className: 'whitespace-nowrap',
       render: (item: Salida) => item.frenteTrabajo?.nombre || '-',
     },
     {
-      header: 'Descripción', key: 'descripcion_trabajo', className: 'w-36',
+      header: 'Descripción', key: 'descripcion_trabajo', className: 'whitespace-nowrap',
       render: (item: Salida) => item.descripcion_trabajo || '-',
     },
     {
-      header: 'Entrega', key: 'quien_entrega', className: 'w-32',
+      header: 'Entrega', key: 'quien_entrega', className: 'whitespace-nowrap',
       render: (item: Salida) => item.quienEntrega?.nombre || '-',
     },
     {
-      header: 'Recibe', key: 'quien_recibe', className: 'w-32',
+      header: 'Recibe', key: 'quien_recibe', className: 'whitespace-nowrap',
       render: (item: Salida) => item.quienRecibe?.nombre || '-',
     },
     ...((canEdit || canDelete) ? [{
-      header: 'Acciones', key: 'actions', className: 'w-20',
+      header: 'Acciones', key: 'actions', className: 'whitespace-nowrap',
       render: (item: Salida) => (
         <div className="flex items-center gap-1">
           {canEdit && (
@@ -391,29 +405,6 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha y Hora</label>
-              <input
-                type="datetime-local"
-                value={form.fecha}
-                onChange={(e) => setForm({ ...form, fecha: e.target.value })}
-                className="input-field"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">N° Registro</label>
-              <input
-                type="text"
-                value={form.num_registro}
-                onChange={(e) => setForm({ ...form, num_registro: e.target.value })}
-                className="input-field"
-                placeholder="Opcional"
-              />
-            </div>
-          </div>
-
           {/* Resource selector */}
           <div ref={recursoRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Recurso</label>
@@ -474,16 +465,16 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Frente de Trabajo</label>
-              <select
-                value={form.frente_trabajo_id}
-                onChange={(e) => setForm({ ...form, frente_trabajo_id: e.target.value })}
-                className="input-field"
-              >
-                <option value="">Seleccionar...</option>
-                {frentesTrabajo.map((ft) => (
-                  <option key={ft.id} value={ft.id}>{ft.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={frentesTrabajo.map((ft) => ({ value: String(ft.id), label: ft.nombre }))}
+                value={form.frente_trabajo_id ? { value: form.frente_trabajo_id, label: frentesTrabajo.find((ft) => String(ft.id) === form.frente_trabajo_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, frente_trabajo_id: opt?.value || '' })}
+                placeholder="Buscar frente..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del Trabajo</label>
@@ -500,29 +491,29 @@ export default function SalidasTab({ categorias }: SalidasTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Quién Entrega</label>
-              <select
-                value={form.quien_entrega_id}
-                onChange={(e) => setForm({ ...form, quien_entrega_id: e.target.value })}
-                className="input-field"
-              >
-                <option value="">Seleccionar...</option>
-                {personas.map((p) => (
-                  <option key={p.id} value={p.id}>{p.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={personas.map((p) => ({ value: String(p.id), label: p.nombre }))}
+                value={form.quien_entrega_id ? { value: form.quien_entrega_id, label: personas.find((p) => String(p.id) === form.quien_entrega_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, quien_entrega_id: opt?.value || '' })}
+                placeholder="Buscar persona..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Quién Recibe</label>
-              <select
-                value={form.quien_recibe_id}
-                onChange={(e) => setForm({ ...form, quien_recibe_id: e.target.value })}
-                className="input-field"
-              >
-                <option value="">Seleccionar...</option>
-                {personas.map((p) => (
-                  <option key={p.id} value={p.id}>{p.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={personas.map((p) => ({ value: String(p.id), label: p.nombre }))}
+                value={form.quien_recibe_id ? { value: form.quien_recibe_id, label: personas.find((p) => String(p.id) === form.quien_recibe_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, quien_recibe_id: opt?.value || '' })}
+                placeholder="Buscar persona..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
           </div>
 

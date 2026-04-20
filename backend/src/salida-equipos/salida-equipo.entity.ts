@@ -19,8 +19,11 @@ export class SalidaEquipo {
   @Column({ type: 'timestamp' })
   fecha: Date;
 
-  @Column({ length: 50, nullable: true })
-  num_registro: string;
+  @Column({ type: 'character varying', length: 20, default: 'PRESTAMO' })
+  tipo_salida: string;
+
+  @Column({ default: false })
+  cerrada: boolean;
 
   @Column()
   equipo_id: number;

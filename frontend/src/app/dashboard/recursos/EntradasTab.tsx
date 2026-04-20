@@ -8,6 +8,7 @@ import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
 import { Search, Plus, Trash2, Pencil } from 'lucide-react';
 import { showSuccess, showError, confirmDelete } from '@/lib/swal';
+import Select from 'react-select';
 
 interface Recurso {
   id: number;
@@ -58,6 +59,27 @@ interface EntradasTabProps {
   categorias: Categoria[];
 }
 
+const selectStyles = {
+  control: (base: Record<string, unknown>, state: { isFocused: boolean }) => ({
+    ...base,
+    minHeight: '38px',
+    borderColor: state.isFocused ? '#6366f1' : '#d1d5db',
+    boxShadow: state.isFocused ? '0 0 0 1px #6366f1' : 'none',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    '&:hover': { borderColor: '#6366f1' },
+  }),
+  option: (base: Record<string, unknown>, state: { isSelected: boolean; isFocused: boolean }) => ({
+    ...base,
+    fontSize: '0.875rem',
+    backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? '#eef2ff' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+  }),
+  placeholder: (base: Record<string, unknown>) => ({ ...base, color: '#9ca3af', fontSize: '0.875rem' }),
+  singleValue: (base: Record<string, unknown>) => ({ ...base, fontSize: '0.875rem', color: '#111827' }),
+  menu: (base: Record<string, unknown>) => ({ ...base, zIndex: 9999, borderRadius: '0.5rem', fontSize: '0.875rem' }),
+};
+
 export default function EntradasTab({ categorias }: EntradasTabProps) {
   const { user } = useAuth();
   const [data, setData] = useState<Entrada[]>([]);
@@ -78,8 +100,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
   const [editing, setEditing] = useState<Entrada | null>(null);
 
   const [form, setForm] = useState({
-    fecha: new Date().toISOString().slice(0, 16),
-    num_guia: '',
+    fecha: '',
     recurso_id: '',
     cantidad: '',
     quien_entrega_id: '',
@@ -164,8 +185,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
     setFormLoading(true);
     try {
       const payload = {
-        fecha: form.fecha,
-        num_guia: form.num_guia || undefined,
+        fecha: editing ? form.fecha : new Date().toISOString(),
         recurso_id: parseInt(form.recurso_id),
         cantidad: parseInt(form.cantidad),
         quien_entrega_id: form.quien_entrega_id ? parseInt(form.quien_entrega_id) : undefined,
@@ -194,8 +214,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
   const openEdit = (item: Entrada) => {
     setEditing(item);
     setForm({
-      fecha: new Date(item.fecha).toISOString().slice(0, 16),
-      num_guia: item.num_guia || '',
+      fecha: item.fecha,
       recurso_id: String(item.recurso.id),
       cantidad: String(item.cantidad),
       quien_entrega_id: String(item.quienEntrega?.id || ''),
@@ -222,8 +241,7 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
 
   const resetForm = () => {
     setForm({
-      fecha: new Date().toISOString().slice(0, 16),
-      num_guia: '',
+      fecha: '',
       recurso_id: '',
       cantidad: '',
       quien_entrega_id: '',
@@ -244,14 +262,11 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
 
   const columns = [
     {
-      header: 'Fecha', key: 'fecha', className: 'w-28',
+      header: 'Fecha', key: 'fecha', className: 'whitespace-nowrap',
       render: (item: Entrada) => new Date(item.fecha).toLocaleDateString('es-PE'),
     },
-    { header: 'N° Guía', key: 'num_guia', className: 'w-28',
-      render: (item: Entrada) => item.num_guia || '-',
-    },
     {
-      header: 'Código', key: 'codigo', className: 'w-24',
+      header: 'Código', key: 'codigo', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.recurso.codigo,
     },
     {
@@ -259,33 +274,33 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
       render: (item: Entrada) => item.recurso.nombre,
     },
     {
-      header: 'Categoría', key: 'categoria', className: 'w-28',
+      header: 'Categoría', key: 'categoria', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.recurso.categoria?.nombre || '-',
     },
     {
-      header: 'Unidad', key: 'unidad', className: 'w-20',
+      header: 'Unidad', key: 'unidad', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.recurso.unidad,
     },
     {
-      header: 'Cantidad', key: 'cantidad', className: 'w-24 text-center',
+      header: 'Cantidad', key: 'cantidad', className: 'whitespace-nowrap text-center',
       render: (item: Entrada) => (
         <span className="text-emerald-600 font-semibold">+{item.cantidad}</span>
       ),
     },
     {
-      header: 'Entrega', key: 'quien_entrega', className: 'w-32',
+      header: 'Entrega', key: 'quien_entrega', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.quienEntrega?.nombre || '-',
     },
     {
-      header: 'Recibe', key: 'quien_recibe', className: 'w-32',
+      header: 'Recibe', key: 'quien_recibe', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.quienRecibe?.nombre || '-',
     },
     {
-      header: 'Transporte', key: 'medio_transporte', className: 'w-28',
+      header: 'Transporte', key: 'medio_transporte', className: 'whitespace-nowrap',
       render: (item: Entrada) => item.medioTransporte?.nombre || '-',
     },
     ...((canEdit || canDelete) ? [{
-      header: 'Acciones', key: 'actions', className: 'w-20',
+      header: 'Acciones', key: 'actions', className: 'whitespace-nowrap',
       render: (item: Entrada) => (
         <div className="flex items-center gap-1">
           {canEdit && (
@@ -368,29 +383,6 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-              <input
-                type="datetime-local"
-                value={form.fecha}
-                onChange={(e) => setForm({ ...form, fecha: e.target.value })}
-                className="input-field"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">N° Guía</label>
-              <input
-                type="text"
-                value={form.num_guia}
-                onChange={(e) => setForm({ ...form, num_guia: e.target.value })}
-                className="input-field"
-                placeholder="Opcional"
-              />
-            </div>
-          </div>
-
           <div ref={recursoRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Recurso</label>
             <input
@@ -450,44 +442,44 @@ export default function EntradasTab({ categorias }: EntradasTabProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Quién Entrega</label>
-              <select
-                value={form.quien_entrega_id}
-                onChange={(e) => setForm({ ...form, quien_entrega_id: e.target.value })}
-                className="input-field"
-              >
-                <option value="">-- Seleccionar --</option>
-                {proveedores.map((p) => (
-                  <option key={p.id} value={p.id}>{p.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={proveedores.map((p) => ({ value: String(p.id), label: p.nombre }))}
+                value={form.quien_entrega_id ? { value: form.quien_entrega_id, label: proveedores.find((p) => String(p.id) === form.quien_entrega_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, quien_entrega_id: opt?.value || '' })}
+                placeholder="Buscar proveedor..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Quién Recibe</label>
-              <select
-                value={form.quien_recibe_id}
-                onChange={(e) => setForm({ ...form, quien_recibe_id: e.target.value })}
-                className="input-field"
-              >
-                <option value="">-- Seleccionar --</option>
-                {personas.map((p) => (
-                  <option key={p.id} value={p.id}>{p.nombre}</option>
-                ))}
-              </select>
+              <Select
+                options={personas.map((p) => ({ value: String(p.id), label: p.nombre }))}
+                value={form.quien_recibe_id ? { value: form.quien_recibe_id, label: personas.find((p) => String(p.id) === form.quien_recibe_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, quien_recibe_id: opt?.value || '' })}
+                placeholder="Buscar persona..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Medio de Transporte</label>
-            <select
-              value={form.medio_transporte_id}
-              onChange={(e) => setForm({ ...form, medio_transporte_id: e.target.value })}
-              className="input-field"
-            >
-              <option value="">-- Seleccionar --</option>
-              {mediosTransporte.map((mt) => (
-                <option key={mt.id} value={mt.id}>{mt.nombre}</option>
-              ))}
-            </select>
+            <Select
+              options={mediosTransporte.map((mt) => ({ value: String(mt.id), label: mt.nombre }))}
+              value={form.medio_transporte_id ? { value: form.medio_transporte_id, label: mediosTransporte.find((mt) => String(mt.id) === form.medio_transporte_id)?.nombre || '' } : null}
+              onChange={(opt) => setForm({ ...form, medio_transporte_id: opt?.value || '' })}
+              placeholder="Buscar transporte..."
+              isClearable
+              noOptionsMessage={() => 'Sin resultados'}
+              classNamePrefix="rs"
+              styles={selectStyles}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

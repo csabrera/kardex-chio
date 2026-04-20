@@ -5,14 +5,15 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import EquiposTab from './EquiposTab';
 import SalidaEquiposTab from './SalidaEquiposTab';
-import EntradaEquiposTab from './EntradaEquiposTab';
-import { Wrench, Truck, ArrowDownToLine } from 'lucide-react';
+import UbicacionTab from './UbicacionTab';
+import { Wrench, Truck, MapPin } from 'lucide-react';
 
-type Tab = 'equipos' | 'salida-equipos' | 'entrada-equipos';
+type Tab = 'equipos' | 'salida-equipos' | 'ubicacion';
 
 interface Persona {
   id: number;
   nombre: string;
+  tipo?: string;
 }
 
 interface FrenteTrabajo {
@@ -22,8 +23,8 @@ interface FrenteTrabajo {
 
 const TABS = [
   { id: 'equipos' as const, label: 'Equipos', icon: Wrench },
-  { id: 'entrada-equipos' as const, label: 'Entrada Equipos', icon: ArrowDownToLine },
   { id: 'salida-equipos' as const, label: 'Salida Equipos', icon: Truck },
+  { id: 'ubicacion' as const, label: 'Ubicación', icon: MapPin },
 ];
 
 export default function GestionEquiposPage() {
@@ -70,9 +71,9 @@ export default function GestionEquiposPage() {
 
       {!loading && (
         <>
-          {activeTab === 'equipos' && <EquiposTab />}
+          {activeTab === 'equipos' && <EquiposTab personas={personas} />}
           {activeTab === 'salida-equipos' && <SalidaEquiposTab personas={personas} frentesTrabajo={frentesTrabajo} />}
-          {activeTab === 'entrada-equipos' && <EntradaEquiposTab personas={personas} frentesTrabajo={frentesTrabajo} />}
+          {activeTab === 'ubicacion' && <UbicacionTab frentesTrabajo={frentesTrabajo} />}
         </>
       )}
     </div>

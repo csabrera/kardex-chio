@@ -304,3 +304,84 @@ INSERT INTO unidades_medida (codigo, nombre) VALUES
 -- Usuario admin por defecto (password: 00000000 - bcrypt hash)
 INSERT INTO usuarios (tipo_documento, documento, password, rol, primer_inicio, nombre, apellido_paterno, apellido_materno) VALUES
     ('DNI', '00000000', '$2b$10$N1GIjsmwKS/j2bJRWFhJoeudFOIZk16oCamYleYr1qKOODOTYJ1cO', 'ADMIN', FALSE, 'Administrador', 'Sistema', 'Admin');
+
+-- ============================================================
+-- MIGRACION v2: Rediseno flujo equipos
+-- ============================================================
+
+-- Agregar AGOTADO al enum equipo_estado
+ALTER TYPE equipo_estado ADD VALUE IF NOT EXISTS 'AGOTADO';
+ALTER TYPE equipo_estado ADD VALUE IF NOT EXISTS 'INACTIVO';
+
+-- salida_equipos: tipo_salida y cerrada
+ALTER TABLE salida_equipos ADD COLUMN IF NOT EXISTS tipo_salida VARCHAR(20) NOT NULL DEFAULT 'PRESTAMO';
+ALTER TABLE salida_equipos ADD COLUMN IF NOT EXISTS cerrada BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- entrada_equipos: tipo_entrada y referencia a salida origen
+ALTER TABLE entrada_equipos ADD COLUMN IF NOT EXISTS tipo_entrada VARCHAR(20) NOT NULL DEFAULT 'ADQUISICION';
+ALTER TABLE entrada_equipos ADD COLUMN IF NOT EXISTS salida_equipo_id INTEGER REFERENCES salida_equipos(id);
+
+-- Vista: stock disponible por equipo
+-- Usa subqueries para evitar producto cartesiano entre entrada_equipos y salida_equipos
+CREATE OR REPLACE VIEW vista_stock_equipos AS
+SELECT
+  e.id,
+  e.codigo,
+  e.nombre,
+  e.activo,
+  COALESCE(entradas.total_adquirido, 0)  AS total_adquirido,
+  COALESCE(entradas.total_retornado, 0)  AS total_retornado,
+  COALESCE(salidas.total_despachado, 0)  AS total_despachado,
+  (
+    COALESCE(entradas.total_adquirido, 0) +
+    COALESCE(entradas.total_retornado, 0) -
+    COALESCE(salidas.total_despachado, 0)
+  ) AS stock_disponible,
+  CASE
+    WHEN NOT e.activo THEN 'INACTIVO'
+    WHEN (
+      COALESCE(entradas.total_adquirido, 0) +
+      COALESCE(entradas.total_retornado, 0) -
+      COALESCE(salidas.total_despachado, 0)
+    ) > 0 THEN 'EN_ALMACEN'
+    ELSE 'AGOTADO'
+  END AS estado
+FROM equipos e
+LEFT JOIN (
+  SELECT equipo_id,
+    SUM(CASE WHEN tipo_entrada = 'ADQUISICION' THEN cantidad ELSE 0 END) AS total_adquirido,
+    SUM(CASE WHEN tipo_entrada = 'RETORNO'     THEN cantidad ELSE 0 END) AS total_retornado
+  FROM entrada_equipos
+  GROUP BY equipo_id
+) entradas ON entradas.equipo_id = e.id
+LEFT JOIN (
+  SELECT equipo_id, SUM(cantidad) AS total_despachado
+  FROM salida_equipos
+  GROUP BY equipo_id
+) salidas ON salidas.equipo_id = e.id;
+
+-- Vista: ubicacion tiempo real (salidas abiertas con pendiente > 0)
+CREATE OR REPLACE VIEW vista_ubicacion_equipos AS
+SELECT
+  se.id AS salida_id,
+  e.id  AS equipo_id,
+  e.codigo,
+  e.nombre AS equipo_nombre,
+  se.tipo_salida,
+  se.fecha,
+  se.descripcion_trabajo,
+  ft.nombre AS frente_trabajo,
+  pe.nombre AS quien_entrega,
+  pr.nombre AS quien_recibe,
+  se.cantidad AS cantidad_enviada,
+  COALESCE(SUM(ee.cantidad), 0) AS cantidad_retornada,
+  (se.cantidad - COALESCE(SUM(ee.cantidad), 0)) AS cantidad_pendiente,
+  se.cerrada
+FROM salida_equipos se
+JOIN  equipos e        ON e.id  = se.equipo_id
+LEFT JOIN frentes_trabajo ft ON ft.id = se.frente_trabajo_id
+LEFT JOIN personas pe        ON pe.id = se.quien_entrega_id
+LEFT JOIN personas pr        ON pr.id = se.quien_recibe_id
+LEFT JOIN entrada_equipos ee ON ee.salida_equipo_id = se.id AND ee.tipo_entrada = 'RETORNO'
+GROUP BY se.id, e.id, ft.id, pe.id, pr.id
+ORDER BY e.nombre, se.fecha DESC;

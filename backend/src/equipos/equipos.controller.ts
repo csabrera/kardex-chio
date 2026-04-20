@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Request,
   ParseIntPipe,
 } from '@nestjs/common';
 import { EquiposService } from './equipos.service';
@@ -41,6 +42,16 @@ export class EquiposController {
     return this.equiposService.findAll({ page, limit, search, estado });
   }
 
+  @Get('ubicacion')
+  getUbicacion(
+    @Query('equipo_id') equipo_id?: number,
+    @Query('frente_trabajo_id') frente_trabajo_id?: number,
+    @Query('tipo_salida') tipo_salida?: string,
+    @Query('cerrada') cerrada?: string,
+  ) {
+    return this.equiposService.getUbicacion({ equipo_id, frente_trabajo_id, tipo_salida, cerrada });
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.equiposService.findOne(id);
@@ -49,8 +60,8 @@ export class EquiposController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
-  create(@Body() dto: CreateEquipoDto) {
-    return this.equiposService.create(dto);
+  create(@Body() dto: CreateEquipoDto, @Request() req: any) {
+    return this.equiposService.create(dto, req.user.id);
   }
 
   @Put(':id')

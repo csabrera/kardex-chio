@@ -9,11 +9,25 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
     'EN_ALMACEN': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
     'SALIDA': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
     'INGRESO': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+    'ADQUISICION': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+    'RETORNO': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+    'PRESTAMO': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+    'ASIGNACION': { bg: 'bg-purple-50', text: 'text-purple-700', dot: 'bg-purple-500' },
+    'ABIERTA': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+    'CERRADA': { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
+    'EN_CAMPO': { bg: 'bg-orange-50', text: 'text-orange-700', dot: 'bg-orange-500' },
   };
 
   const labels: Record<string, string> = {
     'EN_ALMACEN': 'En Almacén',
     'DISPONIBLE': 'Disponible',
+    'ADQUISICION': 'Adquisición',
+    'RETORNO': 'Retorno',
+    'PRESTAMO': 'Préstamo',
+    'ASIGNACION': 'Asignación',
+    'EN_CAMPO': 'En Campo',
+    'CERRADA': 'Cerrada',
+    'ABIERTA': 'Abierta',
   };
 
   const style = styles[status] || { bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-500' };

@@ -29,6 +29,8 @@ export class EntradaEquiposController {
     @Query('search') search?: string,
     @Query('fecha_desde') fecha_desde?: string,
     @Query('fecha_hasta') fecha_hasta?: string,
+    @Query('tipo_entrada') tipo_entrada?: string,
+    @Query('equipo_id') equipo_id?: number,
   ) {
     return this.entradaEquiposService.findAll({
       page,
@@ -36,7 +38,19 @@ export class EntradaEquiposController {
       search,
       fecha_desde,
       fecha_hasta,
+      tipo_entrada,
+      equipo_id,
     });
+  }
+
+  @Get('equipo/:equipoId')
+  findHistorialByEquipo(
+    @Param('equipoId', ParseIntPipe) equipoId: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('tipo_entrada') tipo_entrada?: string,
+  ) {
+    return this.entradaEquiposService.findHistorialByEquipo(equipoId, { page, limit, tipo_entrada });
   }
 
   @Get(':id')
