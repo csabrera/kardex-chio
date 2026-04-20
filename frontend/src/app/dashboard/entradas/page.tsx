@@ -234,7 +234,7 @@ export default function EntradasPage() {
       render: (item: Entrada) => item.recurso.codigo,
     },
     {
-      header: 'Recurso', key: 'recurso_nombre', maxWidth: '250px',
+      header: 'Recurso', key: 'recurso_nombre',
       render: (item: Entrada) => item.recurso.nombre,
     },
     {

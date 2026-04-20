@@ -191,7 +191,7 @@ export default function UsuariosPage() {
     },
     { header: 'Documento', key: 'documento', className: 'w-28' },
     {
-      header: 'Nombre Completo', key: 'nombre', maxWidth: '250px',
+      header: 'Nombre Completo', key: 'nombre',
       render: (item: Usuario) => item.nombre
         ? `${item.nombre} ${item.apellido_paterno || ''} ${item.apellido_materno || ''}`.trim()
         : <span className="text-gray-400 italic">Pendiente</span>,

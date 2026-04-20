@@ -186,7 +186,7 @@ export default function PersonasPage() {
       header: 'Tipo', key: 'tipo', className: 'w-32', hideOnMobile: true,
       render: (item: Persona) => tipoBadge(item.tipo),
     },
-    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
+    { header: 'Nombre', key: 'nombre' },
     { header: 'Documento', key: 'documento', className: 'w-32',
       render: (item: Persona) => item.documento || <span className="text-gray-400 italic">-</span>,
     },

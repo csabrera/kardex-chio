@@ -148,6 +148,7 @@ CREATE TABLE salidas (
 -- =============================================
 CREATE TABLE equipos (
     id SERIAL PRIMARY KEY,
+    codigo VARCHAR(20) UNIQUE,
     nombre VARCHAR(300) NOT NULL,
     categoria_id INTEGER REFERENCES categorias(id),
     unidad_medida_id INTEGER REFERENCES unidades_medida(id),

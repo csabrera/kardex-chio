@@ -141,7 +141,7 @@ export default function FrentesTrabajoPage() {
 
   const columns = [
     { header: 'Código', key: 'codigo', className: 'w-32' },
-    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
+    { header: 'Nombre', key: 'nombre' },
     {
       header: 'Descripción', key: 'descripcion', hideOnMobile: true,
       render: (item: FrenteTrabajo) => item.descripcion

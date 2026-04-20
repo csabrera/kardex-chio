@@ -236,7 +236,7 @@ export default function SalidasPage() {
       render: (item: Salida) => item.recurso.codigo,
     },
     {
-      header: 'Recurso', key: 'recurso_nombre', maxWidth: '250px',
+      header: 'Recurso', key: 'recurso_nombre',
       render: (item: Salida) => item.recurso.nombre,
     },
     {

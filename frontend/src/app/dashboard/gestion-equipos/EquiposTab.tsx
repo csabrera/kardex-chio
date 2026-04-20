@@ -17,10 +17,11 @@ interface UnidadMedida {
 
 interface Equipo {
   id: number;
+  codigo?: string;
   nombre: string;
   categoria: { id: number; nombre: string } | null;
   unidadMedida: { id: number; nombre: string } | null;
-  estado: string;
+  estado?: string;
 }
 
 interface Categoria {
@@ -41,7 +42,9 @@ export default function EquiposTab() {
   const [unidadesMedida, setUnidadesMedida] = useState<UnidadMedida[]>([]);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Equipo | null>(null);
-  const [form, setForm] = useState({ nombre: '', categoria_id: '', unidad_medida_id: '', estado: 'EN_ALMACEN' });
+  const [form, setForm] = useState({ nombre: '', categoria_id: '', unidad_medida_id: '' });
+  const [estadoEdit, setEstadoEdit] = useState('EN_ALMACEN');
+  const [codigoPreview, setCodigoPreview] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -52,6 +55,29 @@ export default function EquiposTab() {
     api.get('/categorias').then(res => setCategorias(res.data)).catch(console.error);
     api.get('/unidades-medida/activos').then(res => setUnidadesMedida(res.data)).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const generatePreview = async () => {
+      if (!form.nombre) {
+        setCodigoPreview('');
+        return;
+      }
+      try {
+        const res = await api.get('/equipos/preview-codigo', {
+          params: {
+            nombre: form.nombre,
+            ...(form.categoria_id && { categoria_id: form.categoria_id }),
+          },
+        });
+        setCodigoPreview(res.data.preview);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const timer = setTimeout(generatePreview, 300);
+    return () => clearTimeout(timer);
+  }, [form.nombre, form.categoria_id]);
 
   const fetchEquipos = useCallback(async () => {
     setLoading(true);
@@ -77,7 +103,8 @@ export default function EquiposTab() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ nombre: '', categoria_id: '', unidad_medida_id: '', estado: 'EN_ALMACEN' });
+    setForm({ nombre: '', categoria_id: '', unidad_medida_id: '' });
+    setCodigoPreview('');
     setFormError('');
     setModal(true);
   };
@@ -88,8 +115,8 @@ export default function EquiposTab() {
       nombre: equipo.nombre,
       categoria_id: equipo.categoria?.id?.toString() || '',
       unidad_medida_id: equipo.unidadMedida?.id?.toString() || '',
-      estado: equipo.estado,
     });
+    setEstadoEdit(equipo.estado || 'EN_ALMACEN');
     setFormError('');
     setModal(true);
   };
@@ -99,7 +126,7 @@ export default function EquiposTab() {
     setFormError('');
     setFormLoading(true);
     try {
-      const payload: Record<string, string | number> = { nombre: form.nombre, estado: form.estado };
+      const payload: Record<string, string | number> = { nombre: form.nombre };
       if (form.categoria_id) payload.categoria_id = parseInt(form.categoria_id);
       if (form.unidad_medida_id) payload.unidad_medida_id = parseInt(form.unidad_medida_id);
       if (editing) {
@@ -131,18 +158,19 @@ export default function EquiposTab() {
   };
 
   const columns = [
-    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
+    { header: 'Código', key: 'codigo', className: 'w-40' },
+    { header: 'Nombre', key: 'nombre' },
     {
-      header: 'Categoría', key: 'categoria', hideOnMobile: true,
+      header: 'Categoría', key: 'categoria',
       render: (item: Equipo) => item.categoria?.nombre || '-',
     },
     {
-      header: 'Unidad', key: 'unidadMedida', hideOnMobile: true,
+      header: 'Unidad', key: 'unidadMedida',
       render: (item: Equipo) => item.unidadMedida?.nombre || '-',
     },
     {
       header: 'Estado', key: 'estado',
-      render: (item: Equipo) => <StatusBadge status={item.estado} />,
+      render: (item: Equipo) => <StatusBadge status={item.estado || 'EN_ALMACEN'} />,
     },
     {
       header: 'Acciones', key: 'actions', className: 'w-24 flex-shrink-0 text-center',
@@ -205,16 +233,17 @@ export default function EquiposTab() {
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input
-              type="text"
-              value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-              className="input-field"
-              required
-            />
-          </div>
+          {!editing && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Código (Automático)</label>
+              <input
+                type="text"
+                value={codigoPreview || 'Escribe el nombre del equipo'}
+                readOnly
+                className="input-field bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
@@ -240,20 +269,35 @@ export default function EquiposTab() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select
-              value={form.estado}
-              onChange={(e) => setForm({ ...form, estado: e.target.value })}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value.toUpperCase() })}
               className="input-field"
-            >
-              <option value="EN_ALMACEN">En Almacén</option>
-              <option value="SALIDA">Salida</option>
-              <option value="INGRESO">Ingreso</option>
-            </select>
+              required
+              placeholder="ej: MONITOR DELL 24 PULGADAS"
+            />
           </div>
+          {editing && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <input
+                type="text"
+                value={estadoEdit}
+                readOnly
+                className="input-field bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-1">El estado se modifica mediante movimientos de equipos</p>
+            </div>
+          )}
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setModal(false)} className="btn-secondary">Cancelar</button>
-            <button type="submit" disabled={formLoading} className="btn-primary disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={formLoading || (!editing && !codigoPreview)}
+              className="btn-primary disabled:opacity-50"
+            >
               {formLoading ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

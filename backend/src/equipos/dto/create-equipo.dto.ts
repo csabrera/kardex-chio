@@ -3,9 +3,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsEnum,
 } from 'class-validator';
-import { EquipoEstado } from '../equipo.entity';
 
 export class CreateEquipoDto {
   @IsString()
@@ -19,8 +17,4 @@ export class CreateEquipoDto {
   @IsNumber()
   @IsOptional()
   unidad_medida_id?: number;
-
-  @IsEnum(EquipoEstado)
-  @IsOptional()
-  estado?: EquipoEstado;
 }

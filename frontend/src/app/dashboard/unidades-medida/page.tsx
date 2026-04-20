@@ -129,7 +129,7 @@ export default function UnidadesMedidaPage() {
 
   const columns = [
     { header: 'Código', key: 'codigo', className: 'w-32' },
-    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
+    { header: 'Nombre', key: 'nombre' },
     {
       header: 'Estado', key: 'activo', className: 'w-28',
       render: (item: UnidadMedida) => (

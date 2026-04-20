@@ -92,7 +92,7 @@ export default function MovimientosPage() {
       },
     },
     {
-      header: 'Recurso / Equipo', key: 'recurso', maxWidth: '250px',
+      header: 'Recurso / Equipo', key: 'recurso',
       render: (item: Movimiento) => {
         if (item.recurso) return `${item.recurso.nombre} (${item.recurso.codigo})`;
         if (item.equipo) return item.equipo.nombre;

@@ -135,7 +135,7 @@ export default function MediosTransportePage() {
   };
 
   const columns = [
-    { header: 'Nombre', key: 'nombre', maxWidth: '250px' },
+    { header: 'Nombre', key: 'nombre' },
     {
       header: 'Estado', key: 'activo', className: 'w-28',
       render: (item: MedioTransporte) => (

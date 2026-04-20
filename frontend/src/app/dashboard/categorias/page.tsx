@@ -136,7 +136,7 @@ export default function CategoriasPage() {
 
   const columns = [
     {
-      header: 'Nombre', key: 'nombre', maxWidth: '250px',
+      header: 'Nombre', key: 'nombre',
       render: (item: Categoria) => (
         <div className="flex items-center gap-2">
           <Tags className="w-4 h-4 text-gray-400 flex-shrink-0" />

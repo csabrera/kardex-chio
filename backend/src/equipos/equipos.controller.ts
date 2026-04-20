@@ -23,6 +23,14 @@ import { UserRole } from '../usuarios/usuario.entity';
 export class EquiposController {
   constructor(private equiposService: EquiposService) {}
 
+  @Get('preview-codigo')
+  getCodigoPreview(
+    @Query('nombre') nombre: string,
+    @Query('categoria_id') categoria_id?: number,
+  ) {
+    return this.equiposService.getCodigoPreview(nombre, categoria_id);
+  }
+
   @Get()
   findAll(
     @Query('page') page?: number,

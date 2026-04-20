@@ -21,6 +21,9 @@ export class Equipo {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true, length: 20, nullable: true })
+  codigo: string;
+
   @Column({ length: 300 })
   nombre: string;
 

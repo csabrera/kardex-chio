@@ -68,11 +68,11 @@ export default function InventarioPage() {
 
   // Form state
   const [form, setForm] = useState({
-    codigo: '',
     nombre: '',
     categoria_id: '',
     unidad_medida_id: '',
   });
+  const [codigoPreview, setCodigoPreview] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -82,6 +82,29 @@ export default function InventarioPage() {
     api.get('/categorias').then((res) => setCategorias(res.data)).catch(console.error);
     api.get('/unidades-medida/activos').then((res) => setUnidades(res.data)).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const generatePreview = async () => {
+      if (!form.categoria_id || !form.nombre) {
+        setCodigoPreview('');
+        return;
+      }
+      try {
+        const res = await api.get('/recursos/preview-codigo', {
+          params: {
+            nombre: form.nombre,
+            categoria_id: form.categoria_id,
+          },
+        });
+        setCodigoPreview(res.data.preview);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const timer = setTimeout(generatePreview, 300);
+    return () => clearTimeout(timer);
+  }, [form.nombre, form.categoria_id]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -125,13 +148,13 @@ export default function InventarioPage() {
     setFormLoading(true);
     try {
       await api.post('/recursos', {
-        codigo: form.codigo,
         nombre: form.nombre,
         categoria_id: parseInt(form.categoria_id),
         unidad_medida_id: parseInt(form.unidad_medida_id),
       });
       setNuevoModal(false);
-      setForm({ codigo: '', nombre: '', categoria_id: '', unidad_medida_id: '' });
+      setForm({ nombre: '', categoria_id: '', unidad_medida_id: '' });
+      setCodigoPreview('');
       showSuccess('Recurso creado exitosamente');
       fetchData();
     } catch (err: unknown) {
@@ -301,17 +324,23 @@ export default function InventarioPage() {
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Código</label>
-            <input type="text" value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} className="input-field" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Recurso</label>
-            <input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className="input-field" required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Código (Automático)</label>
+            <input
+              type="text"
+              value={codigoPreview || 'Selecciona categoría primero'}
+              readOnly
+              className="input-field bg-gray-50 text-gray-600 cursor-not-allowed"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-              <select value={form.categoria_id} onChange={(e) => setForm({ ...form, categoria_id: e.target.value })} className="input-field" required>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría <span className="text-red-500">*</span></label>
+              <select
+                value={form.categoria_id}
+                onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
+                className="input-field"
+                required
+              >
                 <option value="">Seleccionar...</option>
                 {categorias.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.nombre}</option>
@@ -319,8 +348,13 @@ export default function InventarioPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida</label>
-              <select value={form.unidad_medida_id} onChange={(e) => setForm({ ...form, unidad_medida_id: e.target.value })} className="input-field" required>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida <span className="text-red-500">*</span></label>
+              <select
+                value={form.unidad_medida_id}
+                onChange={(e) => setForm({ ...form, unidad_medida_id: e.target.value })}
+                className="input-field"
+                required
+              >
                 <option value="">Seleccionar...</option>
                 {unidades.map((u) => (
                   <option key={u.id} value={u.id}>{u.nombre} ({u.codigo})</option>
@@ -328,9 +362,24 @@ export default function InventarioPage() {
               </select>
             </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Recurso <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              className="input-field"
+              required
+              placeholder="ej: Papel Blanco"
+            />
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setNuevoModal(false)} className="btn-secondary">Cancelar</button>
-            <button type="submit" disabled={formLoading} className="btn-primary disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={formLoading || !codigoPreview}
+              className="btn-primary disabled:opacity-50"
+            >
               {formLoading ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

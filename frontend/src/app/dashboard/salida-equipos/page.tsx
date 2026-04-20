@@ -156,7 +156,7 @@ export default function SalidaEquiposPage() {
     },
     { header: 'N° Registro', key: 'num_registro' },
     {
-      header: 'Equipo', key: 'equipo', maxWidth: '250px',
+      header: 'Equipo', key: 'equipo',
       render: (item: SalidaEquipo) => item.equipo?.nombre || '-',
     },
     { header: 'Cantidad', key: 'cantidad', className: 'text-center' },

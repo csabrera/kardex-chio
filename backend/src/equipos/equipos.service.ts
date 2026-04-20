@@ -1,15 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Equipo } from './equipo.entity';
+import { Repository, DataSource } from 'typeorm';
+import { Equipo, EquipoEstado } from './equipo.entity';
 import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
+import { CodeGenerator } from '../common/utils/code-generator';
+import { Categoria } from '../categorias/categoria.entity';
 
 @Injectable()
 export class EquiposService {
   constructor(
     @InjectRepository(Equipo)
     private equiposRepo: Repository<Equipo>,
+    @InjectRepository(Categoria)
+    private categoriasRepo: Repository<Categoria>,
+    private dataSource: DataSource,
   ) {}
 
   async findAll(query: { page?: number; limit?: number; search?: string; estado?: string }) {
@@ -55,8 +60,92 @@ export class EquiposService {
     return equipo;
   }
 
+  async getCodigoPreview(
+    nombre: string,
+    categoria_id?: number,
+  ): Promise<{ preview: string; nextNumber: number }> {
+    if (!nombre) {
+      return { preview: '', nextNumber: 0 };
+    }
+
+    let categoriaNombre = 'SIN';
+    if (categoria_id) {
+      const categoria = await this.categoriasRepo.findOne({
+        where: { id: categoria_id },
+      });
+      if (categoria) {
+        categoriaNombre = categoria.nombre;
+      }
+    }
+
+    const codePreview = CodeGenerator.generateCodePreview(
+      nombre,
+      categoriaNombre,
+    );
+    const nextNumber = await this.getNextCodigoNumber(nombre, categoriaNombre);
+
+    return {
+      preview: `E-${codePreview}-${String(nextNumber).padStart(3, '0')}`,
+      nextNumber,
+    };
+  }
+
+  private async getNextCodigoNumber(
+    nombreEquipo: string,
+    categoriaNombre: string,
+  ): Promise<number> {
+    const nombrePart = CodeGenerator.getFirstLetters(nombreEquipo);
+    const categoriaPart = CodeGenerator.getFirstLetters(categoriaNombre);
+    const prefijo = `${nombrePart}-${categoriaPart}`;
+
+    const result = await this.dataSource.query(
+      `SELECT codigo FROM equipos WHERE codigo LIKE $1 ORDER BY codigo DESC LIMIT 1`,
+      [`${prefijo}%`],
+    );
+
+    if (!result.length) return 1;
+
+    const lastCodigo = result[0].codigo;
+    const numberPart = lastCodigo.split('-').pop();
+    const nextNumber = parseInt(numberPart || '0') + 1;
+    return nextNumber;
+  }
+
   async create(dto: CreateEquipoDto) {
-    const equipo = this.equiposRepo.create(dto);
+    let categoriaNombre = 'SIN';
+    if (dto.categoria_id) {
+      const categoria = await this.categoriasRepo.findOne({
+        where: { id: dto.categoria_id },
+      });
+      if (categoria) {
+        categoriaNombre = categoria.nombre;
+      }
+    }
+
+    const codePreview = CodeGenerator.generateCodePreview(
+      dto.nombre,
+      categoriaNombre,
+    );
+    const nextNumber = await this.getNextCodigoNumber(
+      dto.nombre,
+      categoriaNombre,
+    );
+    const codigoFinal = `E-${codePreview}-${String(nextNumber).padStart(3, '0')}`;
+
+    const codigoExists = await this.equiposRepo.findOne({
+      where: { codigo: codigoFinal } as any,
+    });
+    if (codigoExists) {
+      throw new BadRequestException(
+        `El código ${codigoFinal} ya existe en el sistema`,
+      );
+    }
+
+    const equipo = this.equiposRepo.create({
+      ...dto,
+      codigo: codigoFinal,
+      estado: EquipoEstado.EN_ALMACEN,
+    });
     return this.equiposRepo.save(equipo);
   }
 

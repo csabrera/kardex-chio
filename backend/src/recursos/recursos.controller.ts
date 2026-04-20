@@ -23,6 +23,14 @@ import { UserRole } from '../usuarios/usuario.entity';
 export class RecursosController {
   constructor(private recursosService: RecursosService) {}
 
+  @Get('preview-codigo')
+  getCodigoPreview(
+    @Query('nombre') nombre: string,
+    @Query('categoria_id') categoria_id: number,
+  ) {
+    return this.recursosService.getCodigoPreview(nombre, categoria_id);
+  }
+
   @Get()
   findAll(
     @Query('page') page?: number,
