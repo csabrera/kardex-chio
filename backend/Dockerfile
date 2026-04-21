@@ -1,5 +1,5 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Development & Build stage
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -10,16 +10,7 @@ COPY . .
 
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install --omit=dev --legacy-peer-deps
-
-COPY --from=builder /app/dist ./dist
-
 EXPOSE 3001
 
-CMD ["node", "dist/main.js"]
+# Development mode uses npm run start:dev, production uses node dist/main.js
+CMD ["npm", "run", "start:dev"]
