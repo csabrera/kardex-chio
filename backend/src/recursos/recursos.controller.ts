@@ -23,12 +23,9 @@ import { UserRole } from '../usuarios/usuario.entity';
 export class RecursosController {
   constructor(private recursosService: RecursosService) {}
 
-  @Get('preview-codigo')
-  getCodigoPreview(
-    @Query('nombre') nombre: string,
-    @Query('categoria_id') categoria_id: number,
-  ) {
-    return this.recursosService.getCodigoPreview(nombre, categoria_id);
+  @Get('verificar-nombre/:nombre')
+  verificarNombre(@Param('nombre') nombre: string) {
+    return this.recursosService.verificarNombre(nombre);
   }
 
   @Get()
@@ -63,6 +60,16 @@ export class RecursosController {
   @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
   create(@Body() dto: CreateRecursoDto) {
     return this.recursosService.create(dto);
+  }
+
+  @Post(':id/agregar-stock')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ALMACENERO)
+  agregarStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { cantidad: number },
+  ) {
+    return this.recursosService.agregarStock(id, body.cantidad);
   }
 
   @Put(':id')

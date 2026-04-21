@@ -18,7 +18,7 @@ export class Recurso {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, length: 20 })
+  @Column({ length: 20, nullable: true })
   codigo: string;
 
   @Column({ length: 300 })

@@ -12,6 +12,7 @@ CREATE TYPE tipo_documento AS ENUM ('DNI', 'CE', 'PASAPORTE');
 CREATE TYPE equipo_estado AS ENUM ('EN_ALMACEN', 'SALIDA', 'INGRESO');
 CREATE TYPE persona_tipo AS ENUM ('PROVEEDOR', 'TRABAJADOR', 'TRANSPORTISTA');
 CREATE TYPE movimiento_tipo AS ENUM ('ENTRADA', 'SALIDA', 'SALIDA_EQUIPO', 'ENTRADA_EQUIPO');
+CREATE TYPE devolucion_estado AS ENUM ('BUENO', 'DAÑADO', 'PARCIAL');
 
 -- =============================================
 -- TABLA: usuarios
@@ -101,7 +102,7 @@ CREATE TABLE medios_transporte (
 -- =============================================
 CREATE TABLE recursos (
     id SERIAL PRIMARY KEY,
-    codigo VARCHAR(20) UNIQUE NOT NULL,
+    codigo VARCHAR(20),
     nombre VARCHAR(300) NOT NULL,
     categoria_id INTEGER NOT NULL REFERENCES categorias(id),
     unidad_medida_id INTEGER NOT NULL REFERENCES unidades_medida(id),
@@ -209,6 +210,37 @@ CREATE TABLE movimientos (
 );
 
 -- =============================================
+-- TABLA: distribucion_frentes (distribución de recursos a obras)
+-- =============================================
+CREATE TABLE distribucion_frentes (
+    id SERIAL PRIMARY KEY,
+    recurso_id INTEGER NOT NULL REFERENCES recursos(id),
+    frente_trabajo_id INTEGER NOT NULL REFERENCES frentes_trabajo(id),
+    cantidad DECIMAL(12,2) NOT NULL CHECK (cantidad > 0),
+    responsable_id UUID NOT NULL REFERENCES usuarios(id),
+    fecha_distribucion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activa BOOLEAN DEFAULT TRUE,
+    fecha_cierre TIMESTAMP,
+    observaciones TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- TABLA: devoluciones (devolución de recursos desde frentes)
+-- =============================================
+CREATE TABLE devoluciones (
+    id SERIAL PRIMARY KEY,
+    distribucion_frente_id INTEGER NOT NULL REFERENCES distribucion_frentes(id),
+    cantidad_devuelta DECIMAL(12,2) NOT NULL CHECK (cantidad_devuelta > 0),
+    quien_devuelve_id UUID NOT NULL REFERENCES usuarios(id),
+    estado devolucion_estado NOT NULL DEFAULT 'BUENO',
+    fecha_devolucion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observaciones TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
 -- VISTA: inventario con existencias calculadas
 -- =============================================
 CREATE VIEW vista_inventario AS
@@ -266,6 +298,15 @@ CREATE INDEX idx_salida_equipos_fecha ON salida_equipos(fecha);
 CREATE INDEX idx_movimientos_recurso ON movimientos(recurso_id);
 CREATE INDEX idx_movimientos_fecha ON movimientos(fecha);
 CREATE INDEX idx_movimientos_tipo ON movimientos(tipo);
+CREATE INDEX idx_distribucion_frentes_recurso ON distribucion_frentes(recurso_id);
+CREATE INDEX idx_distribucion_frentes_frente ON distribucion_frentes(frente_trabajo_id);
+CREATE INDEX idx_distribucion_frentes_responsable ON distribucion_frentes(responsable_id);
+CREATE INDEX idx_distribucion_frentes_activa ON distribucion_frentes(activa);
+CREATE INDEX idx_distribucion_frentes_fecha ON distribucion_frentes(fecha_distribucion);
+CREATE INDEX idx_devoluciones_distribucion ON devoluciones(distribucion_frente_id);
+CREATE INDEX idx_devoluciones_quien_devuelve ON devoluciones(quien_devuelve_id);
+CREATE INDEX idx_devoluciones_estado ON devoluciones(estado);
+CREATE INDEX idx_devoluciones_fecha ON devoluciones(fecha_devolucion);
 
 -- =============================================
 -- DATOS INICIALES

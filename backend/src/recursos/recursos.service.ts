@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, DataSource } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Recurso } from './recurso.entity';
 import { CreateRecursoDto } from './dto/create-recurso.dto';
 import { UpdateRecursoDto } from './dto/update-recurso.dto';
-import { CodeGenerator } from '../common/utils/code-generator';
 import { Categoria } from '../categorias/categoria.entity';
 
 @Injectable()
@@ -86,53 +85,30 @@ export class RecursosService {
     return result[0];
   }
 
-  async getCodigoPreview(
-    nombre: string,
-    categoria_id: number,
-  ): Promise<{ preview: string; nextNumber: number }> {
-    if (!nombre || !categoria_id) {
-      return { preview: '', nextNumber: 0 };
+  async findByNombre(nombre: string): Promise<Recurso | null> {
+    return this.recursosRepo.findOne({
+      where: { nombre, activo: true },
+    });
+  }
+
+  async verificarNombre(nombre: string): Promise<{
+    existe: boolean;
+    recurso?: { id: number; nombre: string; existencia_actual: number };
+  }> {
+    const recurso = await this.findByNombre(nombre);
+    if (!recurso) {
+      return { existe: false };
     }
 
-    const categoria = await this.categoriasRepo.findOne({
-      where: { id: categoria_id },
-    });
-    if (!categoria) throw new NotFoundException('Categoría no encontrada');
-
-    const codePreview = CodeGenerator.generateCodePreview(
-      nombre,
-      categoria.nombre,
-    );
-    const nextNumber = await this.getNextCodigoNumber(
-      nombre,
-      categoria.nombre,
+    const result = await this.dataSource.query(
+      'SELECT id, nombre, existencia_actual FROM vista_inventario WHERE id = $1',
+      [recurso.id],
     );
 
     return {
-      preview: `R-${codePreview}-${String(nextNumber).padStart(3, '0')}`,
-      nextNumber,
+      existe: true,
+      recurso: result[0],
     };
-  }
-
-  async getNextCodigoNumber(
-    nombreRecurso: string,
-    categoriaNombre: string,
-  ): Promise<number> {
-    const nombrePart = CodeGenerator.getFirstLetters(nombreRecurso);
-    const categoriaPart = CodeGenerator.getFirstLetters(categoriaNombre);
-    const prefijo = `${nombrePart}-${categoriaPart}`;
-
-    const result = await this.dataSource.query(
-      `SELECT codigo FROM recursos WHERE codigo LIKE $1 ORDER BY codigo DESC LIMIT 1`,
-      [`${prefijo}%`],
-    );
-
-    if (!result.length) return 1;
-
-    const lastCodigo = result[0].codigo;
-    const numberPart = lastCodigo.split('-').pop();
-    const nextNumber = parseInt(numberPart || '0') + 1;
-    return nextNumber;
   }
 
   async create(dto: CreateRecursoDto) {
@@ -141,30 +117,28 @@ export class RecursosService {
     });
     if (!categoria) throw new NotFoundException('Categoría no encontrada');
 
-    const codePreview = CodeGenerator.generateCodePreview(
-      dto.nombre,
-      categoria.nombre,
-    );
-    const nextNumber = await this.getNextCodigoNumber(
-      dto.nombre,
-      categoria.nombre,
-    );
-    const codigoFinal = `R-${codePreview}-${String(nextNumber).padStart(3, '0')}`;
-
-    const codigoExists = await this.recursosRepo.findOne({
-      where: { codigo: codigoFinal },
-    });
-    if (codigoExists) {
-      throw new BadRequestException(
-        `El código ${codigoFinal} ya existe en el sistema`,
-      );
-    }
-
-    const recurso = this.recursosRepo.create({
-      ...dto,
-      codigo: codigoFinal,
-    });
+    const recurso = this.recursosRepo.create(dto);
     return this.recursosRepo.save(recurso);
+  }
+
+  async agregarStock(id: number, cantidad: number) {
+    const recurso = await this.recursosRepo.findOne({ where: { id } });
+    if (!recurso) throw new NotFoundException('Recurso no encontrado');
+
+    const entrada = await this.dataSource.query(
+      `INSERT INTO entradas (fecha, recurso_id, cantidad, created_by)
+       VALUES (NOW(), $1, $2, NULL)
+       RETURNING id`,
+      [id, cantidad],
+    );
+
+    await this.dataSource.query(
+      `INSERT INTO movimientos (tipo, referencia_id, recurso_id, cantidad, fecha, created_by)
+       VALUES ('ENTRADA', $1, $2, $3, NOW(), NULL)`,
+      [entrada[0].id, id, cantidad],
+    );
+
+    return { message: 'Stock agregado exitosamente', entradaId: entrada[0].id };
   }
 
   async update(id: number, dto: UpdateRecursoDto) {

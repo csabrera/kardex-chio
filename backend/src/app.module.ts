@@ -21,6 +21,8 @@ import { EntradaEquiposModule } from './entrada-equipos/entrada-equipos.module';
 import { MovimientosModule } from './movimientos/movimientos.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportesModule } from './reportes/reportes.module';
+import { DistribucionFrentesModule } from './distribucion-frentes/distribucion-frentes.module';
+import { DevolucionesModule } from './devoluciones/devoluciones.module';
 
 @Module({
   imports: [
@@ -77,6 +79,8 @@ import { ReportesModule } from './reportes/reportes.module';
     MovimientosModule,
     DashboardModule,
     ReportesModule,
+    DistribucionFrentesModule,
+    DevolucionesModule,
   ],
 })
 export class AppModule implements OnModuleInit {

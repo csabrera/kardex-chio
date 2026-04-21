@@ -7,7 +7,7 @@ import DataTable from '@/components/DataTable';
 import Pagination from '@/components/Pagination';
 import Modal from '@/components/Modal';
 import StatusBadge from '@/components/StatusBadge';
-import { Search, Plus, History, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { Search, Plus, History, ArrowDownToLine, ArrowUpFromLine, AlertCircle } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/swal';
 import Select from 'react-select';
 
@@ -95,38 +95,17 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
     categoria_id: '',
     unidad_medida_id: '',
   });
-  const [codigoPreview, setCodigoPreview] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [duplicateModal, setDuplicateModal] = useState(false);
+  const [duplicateData, setDuplicateData] = useState<{ id: number; nombre: string; existencia_actual: number } | null>(null);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
 
   const canEdit = user?.rol === 'ADMIN' || user?.rol === 'ALMACENERO';
 
   useEffect(() => {
     api.get('/unidades-medida/activos').then((res) => setUnidades(res.data)).catch(console.error);
   }, []);
-
-  useEffect(() => {
-    const generatePreview = async () => {
-      if (!form.categoria_id || !form.nombre) {
-        setCodigoPreview('');
-        return;
-      }
-      try {
-        const res = await api.get('/recursos/preview-codigo', {
-          params: {
-            nombre: form.nombre,
-            categoria_id: form.categoria_id,
-          },
-        });
-        setCodigoPreview(res.data.preview);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    const timer = setTimeout(generatePreview, 300);
-    return () => clearTimeout(timer);
-  }, [form.nombre, form.categoria_id]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -164,8 +143,29 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCheckDuplicate = async () => {
+    if (!form.nombre.trim()) {
+      setFormError('Ingresa un nombre');
+      return;
+    }
+    setCheckingDuplicate(true);
+    try {
+      const res = await api.get(`/recursos/verificar-nombre/${form.nombre}`);
+      if (res.data.existe) {
+        setDuplicateData(res.data.recurso);
+        setDuplicateModal(true);
+      } else {
+        await handleCreateNew();
+      }
+    } catch (err) {
+      console.error(err);
+      setFormError('Error al verificar duplicado');
+    } finally {
+      setCheckingDuplicate(false);
+    }
+  };
+
+  const handleCreateNew = async () => {
     setFormError('');
     setFormLoading(true);
     try {
@@ -176,12 +176,36 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
       });
       setNuevoModal(false);
       setForm({ nombre: '', categoria_id: '', unidad_medida_id: '' });
-      setCodigoPreview('');
       showSuccess('Recurso creado exitosamente');
       fetchData();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setFormError(error.response?.data?.message || 'Error al crear recurso');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleAgregarStock = async () => {
+    if (!duplicateData) return;
+    setFormError('');
+    setFormLoading(true);
+    try {
+      const cantidad = parseInt(prompt('¿Cuánto deseas agregar?') || '0');
+      if (cantidad <= 0) {
+        setFormError('Cantidad debe ser mayor a 0');
+        setFormLoading(false);
+        return;
+      }
+      await api.post(`/recursos/${duplicateData.id}/agregar-stock`, { cantidad });
+      setDuplicateModal(false);
+      setNuevoModal(false);
+      setForm({ nombre: '', categoria_id: '', unidad_medida_id: '' });
+      showSuccess(`${cantidad} unidades agregadas`);
+      fetchData();
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setFormError(error.response?.data?.message || 'Error al agregar stock');
     } finally {
       setFormLoading(false);
     }
@@ -344,47 +368,10 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
       </Modal>
 
       <Modal isOpen={nuevoModal} onClose={() => setNuevoModal(false)} title="Nuevo Recurso">
-        <form onSubmit={handleCreate} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); handleCheckDuplicate(); }} className="space-y-4">
           {formError && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm border border-red-200">{formError}</div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Código (Automático)</label>
-            <input
-              type="text"
-              value={codigoPreview || 'Selecciona categoría primero'}
-              readOnly
-              className="input-field bg-gray-50 text-gray-600 cursor-not-allowed"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría <span className="text-red-500">*</span></label>
-              <Select
-                options={categorias.map((cat) => ({ value: String(cat.id), label: cat.nombre }))}
-                value={form.categoria_id ? { value: form.categoria_id, label: categorias.find((c) => String(c.id) === form.categoria_id)?.nombre || '' } : null}
-                onChange={(opt) => setForm({ ...form, categoria_id: opt?.value || '' })}
-                placeholder="Buscar categoría..."
-                isClearable
-                noOptionsMessage={() => 'Sin resultados'}
-                classNamePrefix="rs"
-                styles={selectStyles}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida <span className="text-red-500">*</span></label>
-              <Select
-                options={unidades.map((u) => ({ value: String(u.id), label: `${u.nombre} (${u.codigo})` }))}
-                value={form.unidad_medida_id ? (() => { const u = unidades.find((u) => String(u.id) === form.unidad_medida_id); return u ? { value: form.unidad_medida_id, label: `${u.nombre} (${u.codigo})` } : null; })() : null}
-                onChange={(opt) => setForm({ ...form, unidad_medida_id: opt?.value || '' })}
-                placeholder="Buscar unidad..."
-                isClearable
-                noOptionsMessage={() => 'Sin resultados'}
-                classNamePrefix="rs"
-                styles={selectStyles}
-              />
-            </div>
-          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Recurso <span className="text-red-500">*</span></label>
             <input
@@ -394,19 +381,71 @@ export default function InventarioTab({ categorias }: InventarioTabProps) {
               className="input-field"
               required
               placeholder="ej: PAPEL BLANCO"
+              autoFocus
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría <span className="text-red-500">*</span></label>
+              <Select
+                options={categorias.map((cat) => ({ value: String(cat.id), label: cat.nombre }))}
+                value={form.categoria_id ? { value: form.categoria_id, label: categorias.find((c) => String(c.id) === form.categoria_id)?.nombre || '' } : null}
+                onChange={(opt) => setForm({ ...form, categoria_id: opt?.value || '' })}
+                placeholder="Seleccionar..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida <span className="text-red-500">*</span></label>
+              <Select
+                options={unidades.map((u) => ({ value: String(u.id), label: `${u.nombre}` }))}
+                value={form.unidad_medida_id ? (() => { const u = unidades.find((u) => String(u.id) === form.unidad_medida_id); return u ? { value: form.unidad_medida_id, label: u.nombre } : null; })() : null}
+                onChange={(opt) => setForm({ ...form, unidad_medida_id: opt?.value || '' })}
+                placeholder="Seleccionar..."
+                isClearable
+                noOptionsMessage={() => 'Sin resultados'}
+                classNamePrefix="rs"
+                styles={selectStyles}
+              />
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setNuevoModal(false)} className="btn-secondary">Cancelar</button>
             <button
               type="submit"
-              disabled={formLoading || !codigoPreview}
+              disabled={checkingDuplicate || !form.nombre || !form.categoria_id || !form.unidad_medida_id}
               className="btn-primary disabled:opacity-50"
             >
-              {formLoading ? 'Guardando...' : 'Guardar'}
+              {checkingDuplicate ? 'Verificando...' : 'Guardar'}
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={duplicateModal} onClose={() => setDuplicateModal(false)} title="Recurso Existente">
+        {duplicateData && (
+          <div className="space-y-4">
+            <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-900">{duplicateData.nombre}</p>
+                <p className="text-sm text-amber-700">Stock actual: <span className="font-bold">{duplicateData.existencia_actual} unidades</span></p>
+              </div>
+            </div>
+            <div className="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg text-sm border border-blue-200">
+              ¿Deseas agregar stock al recurso existente?
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDuplicateModal(false)} className="btn-secondary">Cancelar</button>
+              <button onClick={handleAgregarStock} disabled={formLoading} className="btn-primary">
+                {formLoading ? 'Procesando...' : 'Agregar Stock'}
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
