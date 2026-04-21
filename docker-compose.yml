@@ -36,7 +36,6 @@ services:
       - "3011:${BACKEND_PORT}"
     volumes:
       - ./backend:/app
-      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
