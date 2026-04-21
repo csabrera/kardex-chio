@@ -11,10 +11,10 @@ import { showSuccess, showError, confirmDelete } from '@/lib/swal';
 
 interface Recurso {
   id: number;
-  codigo: string;
   nombre: string;
   unidad: string;
-  categoria: { nombre: string };
+  categoria: string;
+  existencia_actual: number;
 }
 
 interface Persona {
@@ -42,10 +42,10 @@ interface Entrada {
   medioTransporte: { id: number; nombre: string } | null;
   recurso: {
     id: number;
-    codigo: string;
     nombre: string;
     unidad: string;
-    categoria: { nombre: string };
+    categoria: string;
+    existencia_actual: number;
   };
 }
 
@@ -217,7 +217,7 @@ export default function EntradasPage() {
   const selectRecurso = (recurso: Recurso) => {
     setSelectedRecurso(recurso);
     setForm({ ...form, recurso_id: String(recurso.id) });
-    setRecursoSearch(`${recurso.codigo} - ${recurso.nombre}`);
+    setRecursoSearch(`${recurso.nombre} (${recurso.unidad}) - Stock: ${recurso.existencia_actual}`);
     setRecursoDropdown(false);
   };
 
@@ -230,16 +230,13 @@ export default function EntradasPage() {
       render: (item: Entrada) => item.num_guia || '-',
     },
     {
-      header: 'Código', key: 'codigo',
-      render: (item: Entrada) => item.recurso.codigo,
-    },
-    {
-      header: 'Recurso', key: 'recurso_nombre',
-      render: (item: Entrada) => item.recurso.nombre,
-    },
-    {
-      header: 'Categoría', key: 'categoria', hideOnMobile: true,
-      render: (item: Entrada) => item.recurso.categoria?.nombre || '-',
+      header: 'Recurso', key: 'recurso_nombre', maxWidth: 250,
+      render: (item: Entrada) => (
+        <div>
+          <div className="font-medium text-gray-900">{item.recurso.nombre}</div>
+          <div className="text-xs text-gray-500">[{item.recurso.categoria}]</div>
+        </div>
+      ),
     },
     {
       header: 'Unidad', key: 'unidad',
@@ -399,14 +396,18 @@ export default function EntradasPage() {
                     key={r.id}
                     type="button"
                     onClick={() => selectRecurso(r)}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-primary-50 transition-colors flex justify-between items-center"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-primary-50 transition-colors"
                   >
-                    <span>
-                      <span className="font-medium text-gray-700">{r.codigo}</span>
-                      <span className="mx-2 text-gray-300">|</span>
-                      <span className="text-gray-600">{r.nombre}</span>
-                    </span>
-                    <span className="text-xs text-gray-400">{r.unidad}</span>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-900">{r.nombre}</span>
+                        <span className="text-gray-400 mx-1">[{r.categoria}]</span>
+                        <span className="text-gray-500 text-xs">({r.unidad})</span>
+                      </div>
+                      <span className={`text-xs font-medium whitespace-nowrap ml-2 ${r.existencia_actual > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        Stock: {r.existencia_actual}
+                      </span>
+                    </div>
                   </button>
                 ))}
               </div>

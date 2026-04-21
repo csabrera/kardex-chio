@@ -12,6 +12,9 @@ import { showSuccess, showError, confirmDelete } from '@/lib/swal';
 interface Equipo {
   id: number;
   nombre: string;
+  categoria: { id: number; nombre: string } | null;
+  unidadMedida: { id: number; nombre: string } | null;
+  stock_disponible: number;
 }
 
 interface Persona {
@@ -263,7 +266,11 @@ export default function SalidaEquiposPage() {
                 required
               >
                 <option value="">Seleccionar equipo...</option>
-                {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
+                {equipos.map(eq => (
+                  <option key={eq.id} value={eq.id}>
+                    {eq.nombre} {eq.categoria ? `[${eq.categoria.nombre}]` : ''} - Stock: {eq.stock_disponible}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
