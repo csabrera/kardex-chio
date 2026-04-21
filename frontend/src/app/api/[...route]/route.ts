@@ -11,16 +11,21 @@ export async function GET(
   const { route } = await params;
   const path = route.join('/');
   const url = new URL(`${BACKEND_URL}/api/${path}`);
-
   url.search = request.nextUrl.search;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    headers['Authorization'] = authHeader;
+  }
 
   try {
     const response = await fetch(url.toString(), {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-      },
+      headers,
     });
 
     const data = await response.json();
@@ -42,15 +47,21 @@ export async function POST(
   const path = route.join('/');
   const url = new URL(`${BACKEND_URL}/api/${path}`);
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    headers['Authorization'] = authHeader;
+  }
+
   try {
     const body = await request.json();
 
     const response = await fetch(url.toString(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-      },
+      headers,
       body: JSON.stringify(body),
     });
 
@@ -73,15 +84,21 @@ export async function PUT(
   const path = route.join('/');
   const url = new URL(`${BACKEND_URL}/api/${path}`);
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    headers['Authorization'] = authHeader;
+  }
+
   try {
     const body = await request.json();
 
     const response = await fetch(url.toString(), {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-      },
+      headers,
       body: JSON.stringify(body),
     });
 
@@ -104,13 +121,19 @@ export async function DELETE(
   const path = route.join('/');
   const url = new URL(`${BACKEND_URL}/api/${path}`);
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    headers['Authorization'] = authHeader;
+  }
+
   try {
     const response = await fetch(url.toString(), {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-      },
+      headers,
     });
 
     const data = await response.json();

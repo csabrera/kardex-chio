@@ -7,6 +7,9 @@ const api = axios.create({
   },
 });
 
+// Flag para evitar redirecciones en loop
+let isRedirecting = false;
+
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
@@ -20,8 +23,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    if (error.response?.status === 401 && typeof window !== 'undefined' && !isRedirecting) {
+      isRedirecting = true;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);

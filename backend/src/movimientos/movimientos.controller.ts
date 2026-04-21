@@ -16,6 +16,7 @@ export class MovimientosController {
     @Query('equipo_id') equipo_id?: number,
     @Query('fecha_desde') fecha_desde?: string,
     @Query('fecha_hasta') fecha_hasta?: string,
+    @Query('search') search?: string,
   ) {
     return this.movimientosService.findAll({
       page,
@@ -25,6 +26,7 @@ export class MovimientosController {
       equipo_id,
       fecha_desde,
       fecha_hasta,
+      search,
     });
   }
 }

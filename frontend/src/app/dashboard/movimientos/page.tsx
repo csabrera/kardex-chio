@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 import DataTable from '@/components/DataTable';
 import Pagination from '@/components/Pagination';
-import { Search, ArrowDownToLine, ArrowUpFromLine, Wrench } from 'lucide-react';
+import { Search, ArrowDownToLine, ArrowUpFromLine, Wrench, Package } from 'lucide-react';
 
 interface Movimiento {
   id: number;
@@ -15,7 +15,7 @@ interface Movimiento {
   descripcion: string;
   recurso: { nombre: string; codigo: string } | null;
   equipo: { nombre: string } | null;
-  creator: { nombre: string; dni: string } | null;
+  creator: { nombre: string; documento: string } | null;
 }
 
 const tipoBadgeStyles: Record<string, { bg: string; text: string; icon: React.ReactNode; label: string }> = {
@@ -37,6 +37,12 @@ const tipoBadgeStyles: Record<string, { bg: string; text: string; icon: React.Re
     icon: <Wrench className="w-3.5 h-3.5" />,
     label: 'Salida Equipo',
   },
+  ENTRADA_EQUIPO: {
+    bg: 'bg-cyan-100',
+    text: 'text-cyan-700',
+    icon: <Package className="w-3.5 h-3.5" />,
+    label: 'Entrada Equipo',
+  },
 };
 
 export default function MovimientosPage() {
@@ -54,6 +60,7 @@ export default function MovimientosPage() {
     setLoading(true);
     try {
       const params: Record<string, string | number> = { page, limit: 20 };
+      if (search) params.search = search;
       if (tipoFilter) params.tipo = tipoFilter;
       if (fechaDesde) params.fecha_desde = fechaDesde;
       if (fechaHasta) params.fecha_hasta = fechaHasta;
@@ -66,7 +73,7 @@ export default function MovimientosPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, tipoFilter, fechaDesde, fechaHasta]);
+  }, [page, search, tipoFilter, fechaDesde, fechaHasta]);
 
   useEffect(() => {
     const timer = setTimeout(fetchData, 300);
@@ -75,8 +82,13 @@ export default function MovimientosPage() {
 
   const columns = [
     {
-      header: 'Fecha', key: 'fecha',
-      render: (item: Movimiento) => new Date(item.fecha).toLocaleDateString('es-PE'),
+      header: 'Fecha & Hora', key: 'fecha', className: 'w-44',
+      render: (item: Movimiento) => {
+        const date = new Date(item.fecha);
+        const fechaFormato = date.toLocaleDateString('es-PE');
+        const horaFormato = date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return `${fechaFormato} ${horaFormato}`;
+      },
     },
     {
       header: 'Tipo', key: 'tipo',
@@ -92,7 +104,7 @@ export default function MovimientosPage() {
       },
     },
     {
-      header: 'Recurso / Equipo', key: 'recurso',
+      header: 'Recurso / Equipo', key: 'recurso', className: 'w-64',
       render: (item: Movimiento) => {
         if (item.recurso) return `${item.recurso.nombre} (${item.recurso.codigo})`;
         if (item.equipo) return item.equipo.nombre;
@@ -100,23 +112,34 @@ export default function MovimientosPage() {
       },
     },
     {
-      header: 'Cantidad', key: 'cantidad', className: 'text-center',
+      header: 'Cantidad', key: 'cantidad', className: 'text-center w-24',
       render: (item: Movimiento) => (
-        <span className={`font-medium ${item.tipo === 'ENTRADA' ? 'text-emerald-600' : item.tipo === 'SALIDA' ? 'text-amber-600' : 'text-blue-600'}`}>
-          {item.tipo === 'ENTRADA' ? '+' : '-'}{item.cantidad}
+        <span className={`font-medium ${item.tipo === 'ENTRADA' || item.tipo === 'ENTRADA_EQUIPO' ? 'text-emerald-600' : 'text-amber-600'}`}>
+          {(item.tipo === 'ENTRADA' || item.tipo === 'ENTRADA_EQUIPO') ? '+' : '-'}{item.cantidad}
         </span>
       ),
     },
-    { header: 'Descripción', key: 'descripcion', hideOnMobile: true },
+    { header: 'Descripción', key: 'descripcion', hideOnMobile: true, className: 'w-48' },
     {
-      header: 'Registrado por', key: 'creator', hideOnMobile: true,
-      render: (item: Movimiento) => item.creator ? item.creator.nombre : '-',
+      header: 'Registrado por', key: 'creator', hideOnMobile: true, className: 'w-48',
+      render: (item: Movimiento) => item.creator ? `${item.creator.nombre} (${item.creator.documento})` : '-',
     },
   ];
 
   return (
     <div className="space-y-4">
-      <div className="card">
+      <div className="card space-y-4">
+        <div className="flex items-center gap-2">
+          <Search className="w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar por nombre, código, descripción..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="input-field flex-1"
+          />
+        </div>
+
         <div className="flex flex-wrap items-center gap-4">
           <select
             value={tipoFilter}
@@ -126,16 +149,18 @@ export default function MovimientosPage() {
             <option value="">Todos los tipos</option>
             <option value="ENTRADA">Entrada</option>
             <option value="SALIDA">Salida</option>
+            <option value="ENTRADA_EQUIPO">Entrada Equipo</option>
             <option value="SALIDA_EQUIPO">Salida Equipo</option>
           </select>
           <div className="flex items-center gap-2">
+            <label className="text-sm text-slate-600 font-medium">Rango:</label>
             <input
               type="date"
               value={fechaDesde}
               onChange={(e) => { setFechaDesde(e.target.value); setPage(1); }}
               className="input-field w-40"
             />
-            <span className="text-gray-400">-</span>
+            <span className="text-slate-400">-</span>
             <input
               type="date"
               value={fechaHasta}

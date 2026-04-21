@@ -18,6 +18,7 @@ export class MovimientosService {
     equipo_id?: number;
     fecha_desde?: string;
     fecha_hasta?: string;
+    search?: string;
   }) {
     const page = query.page || 1;
     const limit = query.limit || 20;
@@ -46,6 +47,14 @@ export class MovimientosService {
 
     if (query.fecha_hasta) {
       qb.andWhere('m.fecha <= :hasta', { hasta: query.fecha_hasta });
+    }
+
+    if (query.search) {
+      const searchTerm = `%${query.search}%`;
+      qb.andWhere(
+        '(r.nombre ILIKE :search OR r.codigo ILIKE :search OR eq.nombre ILIKE :search OR m.descripcion ILIKE :search)',
+        { search: searchTerm }
+      );
     }
 
     qb.orderBy('m.fecha', 'DESC').addOrderBy('m.id', 'DESC');
