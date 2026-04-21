@@ -102,7 +102,6 @@ CREATE TABLE medios_transporte (
 -- =============================================
 CREATE TABLE recursos (
     id SERIAL PRIMARY KEY,
-    codigo VARCHAR(20),
     nombre VARCHAR(300) NOT NULL,
     categoria_id INTEGER NOT NULL REFERENCES categorias(id),
     unidad_medida_id INTEGER NOT NULL REFERENCES unidades_medida(id),
@@ -246,7 +245,6 @@ CREATE TABLE devoluciones (
 CREATE VIEW vista_inventario AS
 SELECT
     r.id,
-    r.codigo,
     r.nombre,
     r.categoria_id,
     c.nombre AS categoria,
@@ -283,7 +281,6 @@ CREATE INDEX idx_personas_activo ON personas(activo);
 CREATE INDEX idx_frentes_trabajo_activo ON frentes_trabajo(activo);
 CREATE INDEX idx_medios_transporte_activo ON medios_transporte(activo);
 CREATE INDEX idx_recursos_categoria ON recursos(categoria_id);
-CREATE INDEX idx_recursos_codigo ON recursos(codigo);
 CREATE INDEX idx_recursos_activo ON recursos(activo);
 CREATE INDEX idx_entradas_recurso ON entradas(recurso_id);
 CREATE INDEX idx_entradas_fecha ON entradas(fecha);
