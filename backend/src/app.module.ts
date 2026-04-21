@@ -59,7 +59,7 @@ import { DevolucionesModule } from './devoluciones/devoluciones.module';
           ),
           database: configService.get<string>('POSTGRES_DB', 'kardexchio'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: true,
+          synchronize: false,
         };
       },
     }),
